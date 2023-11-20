@@ -1,6 +1,7 @@
 package com.example.finalproject
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -10,10 +11,12 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.Nullable
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.finalproject.ml.ModelUnquant
 import org.tensorflow.lite.DataType
@@ -31,15 +34,24 @@ class MainActivity : AppCompatActivity() {
     private lateinit var result: TextView
     private val imageSize = 224
 
+
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        camera = findViewById(R.id.button)
-        gallery = findViewById(R.id.button2)
+        camera = findViewById<Button>(R.id.button)
+        gallery = findViewById<Button>(R.id.button2)
 
         result = findViewById(R.id.result)
         imageView = findViewById(R.id.imageView)
+
+        val welcomeTextView = findViewById<TextView>(R.id.welcomeTextView)
+        val username = intent.getStringExtra("USERNAME_EXTRA")
+
+        if (!username.isNullOrEmpty()) {
+            welcomeTextView.text = "Welcome, $username"
+        }
 
         camera.setOnClickListener {
             if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -51,7 +63,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         gallery.setOnClickListener {
-            val cameraIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            val cameraIntent =
+                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(cameraIntent, 1)
         }
     }
@@ -66,6 +79,7 @@ class MainActivity : AppCompatActivity() {
                     val selectedImage: Uri? = data?.data
                     displayImage(selectedImage)
                 }
+
                 3 -> {
                     // Camera
                     val photo: Bitmap = data?.extras?.get("data") as Bitmap
@@ -107,7 +121,8 @@ class MainActivity : AppCompatActivity() {
         val model = ModelUnquant.newInstance(applicationContext)
 
         // Convert Bitmap to ByteBuffer
-        val inputFeature0 = TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.FLOAT32)
+        val inputFeature0 =
+            TensorBuffer.createFixedSize(intArrayOf(1, 224, 224, 3), DataType.FLOAT32)
         val byteBuffer = convertBitmapToByteBuffer(bitmap)
         inputFeature0.loadBuffer(byteBuffer)
 
@@ -118,7 +133,8 @@ class MainActivity : AppCompatActivity() {
         // Interpret the output tensor
         val classLabels = listOf("clean", "messy") // Replace with your actual class labels
 
-        val maxIndex = outputFeature0.floatArray.indices.maxByOrNull { outputFeature0.floatArray[it] } ?: -1
+        val maxIndex =
+            outputFeature0.floatArray.indices.maxByOrNull { outputFeature0.floatArray[it] } ?: -1
         val predictedClassLabel = if (maxIndex != -1) {
             classLabels[maxIndex]
         } else {
@@ -133,7 +149,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {
-        val byteBuffer = ByteBuffer.allocateDirect(4 * 224 * 224 * 3) // Assuming FLOAT32, adjust if needed
+        val byteBuffer =
+            ByteBuffer.allocateDirect(4 * 224 * 224 * 3) // Assuming FLOAT32, adjust if needed
         byteBuffer.order(ByteOrder.nativeOrder())
 
         val pixels = IntArray(224 * 224)
@@ -147,6 +164,4 @@ class MainActivity : AppCompatActivity() {
 
         return byteBuffer
     }
-
-
 }
