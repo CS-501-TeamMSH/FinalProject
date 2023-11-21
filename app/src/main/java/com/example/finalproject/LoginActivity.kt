@@ -23,7 +23,6 @@ class LoginActivity : AppCompatActivity() {
         val editTextPassword = findViewById<EditText>(R.id.editTextPassword)
         val buttonLogin = findViewById<Button>(R.id.buttonLogin)
         val buttonRegister = findViewById<Button>(R.id.buttonRegister) // Add the Register button in your layout XML
-        val buttonSignOut = findViewById<Button>(R.id.buttonSignOut)
 
         auth = FirebaseAuth.getInstance()
 
