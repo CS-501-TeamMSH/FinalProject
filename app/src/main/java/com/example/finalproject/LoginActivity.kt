@@ -6,31 +6,113 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.auth
 
 class LoginActivity : AppCompatActivity() {
+
+    private lateinit var auth: FirebaseAuth;
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
+
         val editTextUsername = findViewById<EditText>(R.id.editTextUsername)
         val editTextPassword = findViewById<EditText>(R.id.editTextPassword)
         val buttonLogin = findViewById<Button>(R.id.buttonLogin)
+        val buttonRegister = findViewById<Button>(R.id.buttonRegister) // Add the Register button in your layout XML
+        val buttonSignOut = findViewById<Button>(R.id.buttonSignOut)
+
+        auth = FirebaseAuth.getInstance()
+
+        // firebaseAuth = FirebaseAuth.getInstance()
 
         buttonLogin.setOnClickListener {
             val enteredUsername = editTextUsername.text.toString()
             val enteredPassword = editTextPassword.text.toString()
 
-            // setup basic login page with hardcoded strings
-            //Need firebase authentication!!
 
-            if (enteredUsername == "user" && enteredPassword == "p") {
-                val intent = Intent(this, MainActivity::class.java)
-                intent.putExtra("USERNAME_EXTRA", enteredUsername) // Set extra here
-                startActivity(intent) // Start the MainActivity
-                finish() // Finish the LoginActivity
-            } else {
-                // Incorrect credentials, show a message or handle accordingly
-                Toast.makeText(this, "Incorrect password. Please try again.", Toast.LENGTH_SHORT).show()
-            }
+            // Firebase email and password authentication
+            auth.signInWithEmailAndPassword(enteredUsername, enteredPassword)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        // Sign in success, update UI with the signed-in user's information
+                        val user = auth.currentUser
+                        Toast.makeText(
+                            this, "Authentication successful.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        val intent = Intent(this, MainActivity::class.java)
+                        intent.putExtra("USERNAME_EXTRA", enteredUsername) // Set extra here
+                        startActivity(intent) // Start the MainActivity
+                        finish() // Finish the LoginActivity
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Toast.makeText(
+                            this, "Authentication failed. Please try again.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+        }
+
+        buttonRegister.setOnClickListener {
+            val enteredUsername = editTextUsername.text.toString()
+            val enteredPassword = editTextPassword.text.toString()
+
+            auth.createUserWithEmailAndPassword(enteredUsername, enteredPassword)
+                .addOnCompleteListener(this) { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(
+                            this, "Registration successful.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        // Automatically signs in the newly registered user
+                        auth.signInWithEmailAndPassword(enteredUsername, enteredPassword)
+                            .addOnCompleteListener { signInTask ->
+                                if (signInTask.isSuccessful) {
+                                    val intent = Intent(this, MainActivity::class.java)
+                                    intent.putExtra("USERNAME_EXTRA", enteredUsername)
+                                    startActivity(intent)
+                                    finish()
+                                } else {
+                                    Toast.makeText(
+                                        this, "Sign-in after registration failed.",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                    } else {
+                        // Registration failed, display the error message from Firebase
+                        Toast.makeText(
+                            this, "Registration failed: ${task.exception?.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+        }
+
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val currentUser = auth.currentUser
+        // Update UI based on authentication state
+        updateUI(currentUser)
+    }
+
+    private fun updateUI(currentUser: FirebaseUser?) {
+        // You can update the UI based on the currentUser object
+        // For example, enable/disable certain buttons, show user information, etc.
+        if (currentUser != null) {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else {
+            // Handle UI update if the user is not signed in
         }
     }
 }

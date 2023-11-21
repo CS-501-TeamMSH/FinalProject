@@ -19,6 +19,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.finalproject.ml.ModelUnquant
+import com.google.firebase.auth.FirebaseAuth
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.model.Model
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageView: ImageView
     private lateinit var result: TextView
     private val imageSize = 224
-
+    private lateinit var firebaseAuth: FirebaseAuth
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,9 +46,13 @@ class MainActivity : AppCompatActivity() {
 
         result = findViewById(R.id.result)
         imageView = findViewById(R.id.imageView)
+        firebaseAuth = FirebaseAuth.getInstance()
+
 
         val welcomeTextView = findViewById<TextView>(R.id.welcomeTextView)
         val username = intent.getStringExtra("USERNAME_EXTRA")
+        val signOutButton = findViewById<Button>(R.id.buttonSignOut)
+
 
         if (!username.isNullOrEmpty()) {
             welcomeTextView.text = "Welcome, $username"
@@ -67,6 +72,14 @@ class MainActivity : AppCompatActivity() {
                 Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(cameraIntent, 1)
         }
+        signOutButton.setOnClickListener {
+            // Sign out the current user and redirect to the login page
+            firebaseAuth.signOut()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish() // Close MainActivity
+        }
+
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
