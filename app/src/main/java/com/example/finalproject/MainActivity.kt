@@ -56,7 +56,23 @@ class MainActivity : AppCompatActivity() {
 
         if (!username.isNullOrEmpty()) {
             welcomeTextView.text = "Welcome, $username"
+
+            //Persistent storage
+            val persistName = getSharedPreferences("user", MODE_PRIVATE)
+            val editor = persistName.edit()
+            editor.putString("Username", username)
+            editor.apply()
         }
+
+        //Retrieve stored name
+        val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
+        val savedUsername = sharedPreferences.getString("Username", "")
+
+        if (!savedUsername.isNullOrEmpty()) {
+            welcomeTextView.text = "Welcome, $savedUsername"
+        }
+
+
 
         camera.setOnClickListener {
             if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
@@ -72,6 +88,8 @@ class MainActivity : AppCompatActivity() {
                 Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(cameraIntent, 1)
         }
+
+
         signOutButton.setOnClickListener {
             // Sign out the current user and redirect to the login page
             firebaseAuth.signOut()
