@@ -94,6 +94,10 @@ class LoginActivity : AppCompatActivity() {
                 }
         }
 
+        //TODO: Google Authentication
+
+
+
     }
 
     override fun onStart() {
