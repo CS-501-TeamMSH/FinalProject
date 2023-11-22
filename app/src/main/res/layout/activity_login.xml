@@ -1,40 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
-    tools:context=".LoginActivity">
+    tools:context=".MainActivity">
 
     <TextView
         android:id="@+id/welcomeMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="InspectiSafe"
-        android:textColor="#000000"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintTop_toBottomOf="@+id/logoImageView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <ImageView
-        android:id="@+id/logoImageView"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:src="@drawable/download"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:text="Welcome, User"
+        app:layout_constraintBottom_toTopOf="@+id/signOutButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/loginContainer"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="16dp"
-        android:scaleType="fitCenter" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/signOutButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Signout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/welcomeMessage" />
 
+    <Button
+        android:id="@+id/plusButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="+"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/signOutButton" />
+
+    <TextView
+        android:id="@+id/resultTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="P.L.G = 0, 0, 0"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/plusButton" />
 
     <LinearLayout
         android:id="@+id/loginContainer"

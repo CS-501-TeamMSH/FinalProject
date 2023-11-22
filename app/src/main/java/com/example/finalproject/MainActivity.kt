@@ -1,31 +1,32 @@
 package com.example.finalproject
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import android.view.View
 
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.finalproject.ml.ModelUnquant
 import com.google.firebase.auth.FirebaseAuth
 import org.tensorflow.lite.DataType
-import org.tensorflow.lite.support.model.Model
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import android.text.Html
+import android.view.Gravity
+import android.widget.Toast
+import androidx.core.graphics.drawable.toBitmap
+import com.google.firebase.storage.FirebaseStorage
+import java.io.ByteArrayOutputStream
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
 
@@ -33,10 +34,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var gallery: Button
     private lateinit var imageView: ImageView
     private lateinit var result: TextView
+    private lateinit var save: Button
+    private lateinit var retrieveButton: Button
     private val imageSize = 224
-    private lateinit var firebaseAuth: FirebaseAuth
 
-    @SuppressLint("MissingInflatedId")
+    private lateinit var firebaseAuth: FirebaseAuth
+    private lateinit var firebaseStorage: FirebaseStorage
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -47,12 +50,15 @@ class MainActivity : AppCompatActivity() {
         result = findViewById(R.id.result)
         imageView = findViewById(R.id.imageView)
         firebaseAuth = FirebaseAuth.getInstance()
-
+        firebaseStorage = FirebaseStorage.getInstance()
 
         val welcomeTextView = findViewById<TextView>(R.id.welcomeTextView)
         val username = intent.getStringExtra("USERNAME_EXTRA")
         val signOutButton = findViewById<Button>(R.id.buttonSignOut)
 
+
+        val saveButton = findViewById<Button>(R.id.saveImageButton)
+        val retrieveButton = findViewById<Button>(R.id.retrieve)
 
         if (!username.isNullOrEmpty()) {
             welcomeTextView.text = "Welcome, $username"
@@ -64,7 +70,7 @@ class MainActivity : AppCompatActivity() {
             editor.apply()
         }
 
-        //Retrieve stored name
+        //Retrieve stored name!
         val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
         val savedUsername = sharedPreferences.getString("Username", "")
 
@@ -90,6 +96,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+
         signOutButton.setOnClickListener {
             // Sign out the current user and redirect to the login page
             firebaseAuth.signOut()
@@ -98,6 +105,71 @@ class MainActivity : AppCompatActivity() {
             finish() // Close MainActivity
         }
 
+        saveButton.setOnClickListener {
+            // Check if an image is displayed in the ImageView
+            if (imageView.drawable != null) {
+                // Get the drawable bitmap from ImageView
+                val drawableBitmap = (imageView.drawable).toBitmap()
+
+                // Store the bitmap image and the classification text
+                storeImageAndClassification(drawableBitmap, result.text.toString())
+            } else {
+                // Handle the case when no image is displayed
+                Log.e("MainActivity", "No image to save.")
+            }
+        }
+
+        retrieveButton.setOnClickListener {
+            retrieveImageAndClassification()
+        }
+
+
+    }
+    private fun retrieveImageAndClassification() {
+       // val storageRef = firebaseStorage.reference
+
+        Toast.makeText(this, "TODO", Toast.LENGTH_SHORT).show()
+    }
+    // Add this function to store the image and classification text to Firebase Storage
+    private fun storeImageAndClassification(bitmap: Bitmap, classificationText: String) {
+        val storageRef = firebaseStorage.reference
+        val imagesRef = storageRef.child("images/${UUID.randomUUID()}.jpg") // Change the path/name if needed
+        val textRef = storageRef.child("classification/${UUID.randomUUID()}.txt")
+
+        // Convert the bitmap to bytes
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val imageData = baos.toByteArray()
+
+        // Store the image in Firebase Storage
+        val uploadImageTask = imagesRef.putBytes(imageData)
+        uploadImageTask.addOnSuccessListener { imageUploadTask ->
+            imagesRef.downloadUrl.addOnSuccessListener { imageUrl ->
+                Log.d("MainActivity", "Image uploaded to Firebase Storage. Image URL: $imageUrl")
+
+                // Store the classification text in Firebase Storage
+                val textBytes = classificationText.toByteArray()
+                val uploadTextTask = textRef.putBytes(textBytes)
+                uploadTextTask.addOnSuccessListener { textUploadTask ->
+                    textRef.downloadUrl.addOnSuccessListener { textUrl ->
+                        Log.d("MainActivity", "Classification text uploaded to Firebase Storage. Text URL: $textUrl")
+                        // Handle success
+                    }.addOnFailureListener { textUrlFailure ->
+                        Log.e("MainActivity", "Failed to get text URL: ${textUrlFailure.message}")
+                        // Handle failure
+                    }
+                }.addOnFailureListener { textUploadFailure ->
+                    Log.e("MainActivity", "Error uploading classification text: ${textUploadFailure.message}")
+                    // Handle failure
+                }
+            }.addOnFailureListener { imageUrlFailure ->
+                Log.e("MainActivity", "Failed to get image URL: ${imageUrlFailure.message}")
+                // Handle failure
+            }
+        }.addOnFailureListener { imageUploadFailure ->
+            Log.e("MainActivity", "Error uploading image: ${imageUploadFailure.message}")
+            // Handle failure
+        }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -171,12 +243,41 @@ class MainActivity : AppCompatActivity() {
         } else {
             "Unknown"
         }
+        val premiumLabels = listOf("high premium", "medium premium", "low premium")
 
-        // Update the UI with the predicted class label
-        result.text = "$predictedClassLabel"
+        if (predictedClassLabel == classLabels[1]) { // Check if predicted class is "messy"
+            val messyScore = outputFeature0.floatArray[1]  * 100 // Get messy probability
+         //   val highPremiumProbability = 0.7 * messyScore // Calculate high premium probability
+       //     val mediumPremiumProbability = 0.4 * messyScore // Calculate medium premium probability
+         //   val lowPremiumProbability = 0.1 * messyScore // Calculate low premium probability
 
-        // Releases model resources if no longer used.
+            // Determine the predicted premium class based on probabilities
+            var predictedPremiumLabel = "Unknown"
+            if ( messyScore  > 0.7) {
+                predictedPremiumLabel = premiumLabels[0] // Set high premium
+            } else if ( messyScore  > 0.4) {
+                predictedPremiumLabel = premiumLabels[1] // Set medium premium
+            } else {
+                predictedPremiumLabel = premiumLabels[2] // Set low premium
+            }
+
+            // Format and display the result
+            val resultText = "$predictedClassLabel\n $messyScore%"    // Predicted Premium: $predictedPremiumLabel"
+            result.text = Html.fromHtml(resultText, Html.FROM_HTML_MODE_COMPACT)
+            result.gravity = Gravity.CENTER
+           // storeClassificationText(resultText)
+        } else {
+
+            val cleanScore = String.format("%.1f%%", outputFeature0.floatArray[0] * 100)
+            val resultText = "$predictedClassLabel"
+            result.text = resultText
+            result.gravity = Gravity.CENTER
+           // storeClassificationText(resultText)
+          //  Log.d("Reached here", "hi")
+        }
+
         model.close()
+
     }
 
     private fun convertBitmapToByteBuffer(bitmap: Bitmap): ByteBuffer {

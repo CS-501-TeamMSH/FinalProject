@@ -5,6 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#FFFFFF"
+    android:textColor="#000000"
     tools:context=".MainActivity">
 
     <TextView
@@ -14,6 +16,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="24dp"
         android:text="Welcome, "
+        android:backgroundTint="#6200EE"
+        android:textColor="#000000"
         android:textSize="18sp"
         android:textStyle="bold" />
 
@@ -23,6 +27,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Take Picture"
+        android:backgroundTint="#6200EE"
+        android:textColor="#FFFFFF"
         android:textAllCaps="false"
         android:textSize="21sp"
         android:textStyle="bold"
@@ -36,6 +42,8 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Launch Gallery"
+        android:backgroundTint="#6200EE"
+        android:textColor="#FFFFFF"
         android:textAllCaps="false"
         android:textSize="21sp"
         android:textStyle="bold"
@@ -58,6 +66,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Classified as:"
+        android:textColor="#000000"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@+id/imageView"
@@ -65,15 +74,58 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"/>
 
+    <TextView
+        android:id="@+id/premiumLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        android:padding="16dp"
+        android:text="Predicted Premium: "
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
     <Button
         android:id="@+id/buttonSignOut"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Sign Out"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#6200EE"
         app:layout_constraintTop_toBottomOf="@+id/result"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"/>
+    <Button
+        android:id="@+id/saveImageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save Image"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#6200EE"
+        app:layout_constraintTop_toBottomOf="@+id/buttonSignOut"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:layout_constraintEnd_toStartOf="@+id/retrieve"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="40dp"/>
+
+    <Button
+        android:id="@+id/retrieve"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Retrieve Image"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#6200EE"
+        app:layout_constraintTop_toBottomOf="@+id/buttonSignOut"
+        app:layout_constraintStart_toEndOf="@+id/saveImageButton"
+        android:layout_marginStart="60dp"
+        android:layout_marginTop="24dp"/>
+
+
+
 
     <TextView
         android:id="@+id/result"
@@ -87,5 +139,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"/>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
