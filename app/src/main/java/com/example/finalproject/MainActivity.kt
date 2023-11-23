@@ -40,6 +40,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firebaseStorage: FirebaseStorage
+
+    private var currentImageURL: String? = null
+    private var currentTextURL: String? = null
+
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -113,6 +119,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Store the bitmap image and the classification text
                 storeImageAndClassification(drawableBitmap, result.text.toString())
+                Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
             } else {
                 // Handle the case when no image is displayed
                 Log.e("MainActivity", "No image to save.")
@@ -124,12 +131,16 @@ class MainActivity : AppCompatActivity() {
         }
 
 
+        //TODO: Prevent duplicate image + text from being saved
+
     }
     private fun retrieveImageAndClassification() {
-       // val storageRef = firebaseStorage.reference
+        // val storageRef = firebaseStorage.reference
 
         Toast.makeText(this, "TODO", Toast.LENGTH_SHORT).show()
     }
+
+
     // Add this function to store the image and classification text to Firebase Storage
     private fun storeImageAndClassification(bitmap: Bitmap, classificationText: String) {
         val storageRef = firebaseStorage.reference
@@ -247,9 +258,9 @@ class MainActivity : AppCompatActivity() {
 
         if (predictedClassLabel == classLabels[1]) { // Check if predicted class is "messy"
             val messyScore = outputFeature0.floatArray[1]  * 100 // Get messy probability
-         //   val highPremiumProbability = 0.7 * messyScore // Calculate high premium probability
-       //     val mediumPremiumProbability = 0.4 * messyScore // Calculate medium premium probability
-         //   val lowPremiumProbability = 0.1 * messyScore // Calculate low premium probability
+            //   val highPremiumProbability = 0.7 * messyScore // Calculate high premium probability
+            //     val mediumPremiumProbability = 0.4 * messyScore // Calculate medium premium probability
+            //   val lowPremiumProbability = 0.1 * messyScore // Calculate low premium probability
 
             // Determine the predicted premium class based on probabilities
             var predictedPremiumLabel = "Unknown"
@@ -265,15 +276,15 @@ class MainActivity : AppCompatActivity() {
             val resultText = "$predictedClassLabel\n $messyScore%"    // Predicted Premium: $predictedPremiumLabel"
             result.text = Html.fromHtml(resultText, Html.FROM_HTML_MODE_COMPACT)
             result.gravity = Gravity.CENTER
-           // storeClassificationText(resultText)
+            // storeClassificationText(resultText)
         } else {
 
             val cleanScore = String.format("%.1f%%", outputFeature0.floatArray[0] * 100)
             val resultText = "$predictedClassLabel"
             result.text = resultText
             result.gravity = Gravity.CENTER
-           // storeClassificationText(resultText)
-          //  Log.d("Reached here", "hi")
+            // storeClassificationText(resultText)
+            //  Log.d("Reached here", "hi")
         }
 
         model.close()
