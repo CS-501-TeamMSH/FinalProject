@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import com.google.android.gms.common.SignInButton
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -23,7 +24,7 @@ class LoginActivity : AppCompatActivity() {
         val editTextPassword = findViewById<EditText>(R.id.editTextPassword)
         val buttonLogin = findViewById<Button>(R.id.buttonLogin)
         val buttonRegister = findViewById<Button>(R.id.buttonRegister) // Add the Register button in your layout XML
-
+        val buttonGoogle = findViewById<SignInButton>(R.id.googleSignInButton)
         auth = FirebaseAuth.getInstance()
 
         // firebaseAuth = FirebaseAuth.getInstance()
@@ -56,46 +57,73 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
         }
-
         buttonRegister.setOnClickListener {
             val enteredUsername = editTextUsername.text.toString()
             val enteredPassword = editTextPassword.text.toString()
 
-            auth.createUserWithEmailAndPassword(enteredUsername, enteredPassword)
-                .addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful) {
-                        Toast.makeText(
-                            this, "Registration successful.",
-                            Toast.LENGTH_SHORT
-                        ).show()
+            // Check if the user already exists with the entered email
+            auth.fetchSignInMethodsForEmail(enteredUsername)
+                .addOnCompleteListener { fetchTask ->
+                    if (fetchTask.isSuccessful) {
+                        val signInMethods = fetchTask.result?.signInMethods ?: emptyList<String>()
 
-                        // Automatically signs in the newly registered user
-                        auth.signInWithEmailAndPassword(enteredUsername, enteredPassword)
-                            .addOnCompleteListener { signInTask ->
-                                if (signInTask.isSuccessful) {
-                                    val intent = Intent(this, MainActivity::class.java)
-                                    intent.putExtra("USERNAME_EXTRA", enteredUsername)
-                                    startActivity(intent)
-                                    finish()
-                                } else {
-                                    Toast.makeText(
-                                        this, "Sign-in after registration failed.",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                        if (signInMethods.isNotEmpty()) {
+                            // User already exists with the entered email, show error message
+                            Toast.makeText(
+                                this, "User with this email already exists. Please use a different email.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        } else {
+                            // User does not exist, proceed with registration
+                            auth.createUserWithEmailAndPassword(enteredUsername, enteredPassword)
+                                .addOnCompleteListener(this) { task ->
+                                    if (task.isSuccessful) {
+                                        Toast.makeText(
+                                            this, "Registration successful.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+
+                                        // Automatically signs in the newly registered user
+                                        auth.signInWithEmailAndPassword(enteredUsername, enteredPassword)
+                                            .addOnCompleteListener { signInTask ->
+                                                if (signInTask.isSuccessful) {
+                                                    val intent = Intent(this, MainActivity::class.java)
+                                                    intent.putExtra("USERNAME_EXTRA", enteredUsername)
+                                                    startActivity(intent)
+                                                    finish()
+                                                } else {
+                                                    Toast.makeText(
+                                                        this, "Sign-in after registration failed.",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                }
+                                            }
+                                    } else {
+                                        // Registration failed, display the error message from Firebase
+                                        Toast.makeText(
+                                            this, "Registration failed: ${task.exception?.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
                                 }
-                            }
+                        }
                     } else {
-                        // Registration failed, display the error message from Firebase
+                        // Error while fetching user data, display an error message
                         Toast.makeText(
-                            this, "Registration failed: ${task.exception?.message}",
+                            this, "Error checking user existence: ${fetchTask.exception?.message}",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                 }
         }
 
-        //TODO: Google Authentication
 
+
+        buttonGoogle.setOnClickListener {
+            Toast.makeText(this, "TODO", Toast.LENGTH_SHORT).show()
+        }
+
+        //TODO: Implement google sign in(getting error)
 
 
     }
