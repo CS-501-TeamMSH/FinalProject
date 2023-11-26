@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">FinalProject</string>
-    <string name="google_sign_in_api_key"> 453223424167-re666j0751j2bfj875vkdn4c4bg0hn3h.apps.googleusercontent.com </string>
+    <string name="web_client_id"> 86814511792-q8e7p4bid333jb7tnvo3dimqrc4d91fo.apps.googleusercontent.com </string>
 </resources>

@@ -61,6 +61,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"/>
 
+
+
     <TextView
         android:id="@+id/classified"
         android:layout_width="wrap_content"
@@ -74,19 +76,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="24dp"/>
 
-    <TextView
-        android:id="@+id/premiumLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="16dp"
-        android:padding="16dp"
-        android:text="Predicted Premium: "
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        android:visibility="gone" />
+
 
     <Button
         android:id="@+id/buttonSignOut"
