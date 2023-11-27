@@ -26,6 +26,7 @@ import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.google.firebase.storage.FirebaseStorage
+import com.squareup.picasso.Picasso
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
@@ -137,9 +138,53 @@ class MainActivity : AppCompatActivity() {
 
     }
     private fun retrieveImageAndClassification() {
-        // val storageRef = firebaseStorage.reference
+        val storageRef = firebaseStorage.reference
+        val imagesRef = storageRef.child("images")
+        val textRef = storageRef.child("classification")
 
-        Toast.makeText(this, "TODO", Toast.LENGTH_SHORT).show()
+        // Retrieve the image and text URLs from Firebase Storage
+        imagesRef.listAll()
+            .addOnSuccessListener { listResult ->
+                for (item in listResult.items) {
+                    item.downloadUrl.addOnSuccessListener { imageUrl ->
+                        Log.d("MainActivity", "Retrieved image URL: $imageUrl")
+                        // load image
+                        Picasso.get().load(imageUrl)
+                            .error(android.R.drawable.ic_dialog_alert)
+                            .into(imageView)
+
+                    }.addOnFailureListener { e ->
+                        Log.e("MainActivity", "Failed to retrieve image URL: ${e.message}")
+                    }
+//                    break
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Failed to retrieve image URLs: ${e.message}")
+            }
+
+        textRef.listAll()
+            .addOnSuccessListener { listResult ->
+                for (item in listResult.items) {
+                    val textUrl = item.downloadUrl.toString()
+                    Log.d("MainActivity", "Retrieved text URL: $textUrl")
+                    // load text
+                    textRef.child(item.name).getBytes(Long.MAX_VALUE)
+                        .addOnSuccessListener { bytes ->
+                            val classificationText = String(bytes, Charsets.UTF_8)
+                            result.text = classificationText
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("MainActivity", "Failed to retrieve classification text: ${e.message}")
+                        }
+//                    break
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Failed to retrieve text URLs: ${e.message}")
+            }
+
+        Toast.makeText(this, "Retrieving image and text URLs...", Toast.LENGTH_SHORT).show()
     }
 
 
