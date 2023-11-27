@@ -48,6 +48,10 @@ class MainActivity : AppCompatActivity() {
 
     private val WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 123
 
+    private val savedImageURLs = mutableSetOf<String>()
+    private val savedClassificationTexts = mutableSetOf<String>()
+    private val savedImageAndTextSet = HashSet<String>()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -121,8 +125,8 @@ class MainActivity : AppCompatActivity() {
                 val drawableBitmap = (imageView.drawable).toBitmap()
 
                 // Store the bitmap image and the classification text
-                storeImageAndClassification(drawableBitmap, result.text.toString())
-                Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
+//                storeImageAndClassification(drawableBitmap, result.text.toString())
+                preventFirebaseDuplicates(drawableBitmap, result.text.toString())
             } else {
                 // Handle the case when no image is displayed
                 Log.e("MainActivity", "No image to save.")
@@ -187,12 +191,27 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Retrieving image and text URLs...", Toast.LENGTH_SHORT).show()
     }
 
+    private fun preventFirebaseDuplicates(bitmap: Bitmap, classificationText: String) {
+        val imageKey = bitmap.getAllocationByteCount().toString()
+        val imageAndTextKey = "$imageKey-$classificationText"
+
+        if (!savedImageAndTextSet.contains(imageAndTextKey)) {
+            storeImageAndClassification(bitmap, classificationText)
+            savedImageAndTextSet.add(imageAndTextKey)
+            Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
+        } else {
+            Log.d("MainActivity", "Image and text combination already saved.")
+            Toast.makeText(this, "Image and Text combination already saved!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     // Add this function to store the image and classification text to Firebase Storage
     private fun storeImageAndClassification(bitmap: Bitmap, classificationText: String) {
         val storageRef = firebaseStorage.reference
         val imagesRef = storageRef.child("images/${UUID.randomUUID()}.jpg") // Change the path/name if needed
         val textRef = storageRef.child("classification/${UUID.randomUUID()}.txt")
+
 
         // Convert the bitmap to bytes
         val baos = ByteArrayOutputStream()
@@ -204,7 +223,7 @@ class MainActivity : AppCompatActivity() {
         uploadImageTask.addOnSuccessListener { imageUploadTask ->
             imagesRef.downloadUrl.addOnSuccessListener { imageUrl ->
                 Log.d("MainActivity", "Image uploaded to Firebase Storage. Image URL: $imageUrl")
-
+                savedImageURLs.add(currentImageURL ?: "")
                 // Store the classification text in Firebase Storage
                 val textBytes = classificationText.toByteArray()
                 val uploadTextTask = textRef.putBytes(textBytes)
@@ -212,6 +231,7 @@ class MainActivity : AppCompatActivity() {
                     textRef.downloadUrl.addOnSuccessListener { textUrl ->
                         Log.d("MainActivity", "Classification text uploaded to Firebase Storage. Text URL: $textUrl")
                         // Handle success
+                        savedClassificationTexts.add(classificationText)
                     }.addOnFailureListener { textUrlFailure ->
                         Log.e("MainActivity", "Failed to get text URL: ${textUrlFailure.message}")
                         // Handle failure
