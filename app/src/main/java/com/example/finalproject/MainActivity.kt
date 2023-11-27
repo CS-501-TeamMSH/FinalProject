@@ -43,13 +43,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firebaseStorage: FirebaseStorage
 
-    private var currentImageURL: String? = null
-    private var currentTextURL: String? = null
 
     private val WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 123
-
-    private val savedImageURLs = mutableSetOf<String>()
-    private val savedClassificationTexts = mutableSetOf<String>()
     private val savedImageAndTextSet = HashSet<String>()
 
 
@@ -223,7 +218,6 @@ class MainActivity : AppCompatActivity() {
         uploadImageTask.addOnSuccessListener { imageUploadTask ->
             imagesRef.downloadUrl.addOnSuccessListener { imageUrl ->
                 Log.d("MainActivity", "Image uploaded to Firebase Storage. Image URL: $imageUrl")
-                savedImageURLs.add(currentImageURL ?: "")
                 // Store the classification text in Firebase Storage
                 val textBytes = classificationText.toByteArray()
                 val uploadTextTask = textRef.putBytes(textBytes)
@@ -231,7 +225,6 @@ class MainActivity : AppCompatActivity() {
                     textRef.downloadUrl.addOnSuccessListener { textUrl ->
                         Log.d("MainActivity", "Classification text uploaded to Firebase Storage. Text URL: $textUrl")
                         // Handle success
-                        savedClassificationTexts.add(classificationText)
                     }.addOnFailureListener { textUrlFailure ->
                         Log.e("MainActivity", "Failed to get text URL: ${textUrlFailure.message}")
                         // Handle failure
