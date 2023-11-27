@@ -88,34 +88,36 @@
         app:layout_constraintTop_toBottomOf="@+id/result"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="12dp"/>
+
+
     <Button
         android:id="@+id/saveImageButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="40dp"
+        android:backgroundTint="#6200EE"
         android:text="Save Image"
         android:textColor="#FFFFFF"
-        android:backgroundTint="#6200EE"
-        app:layout_constraintTop_toBottomOf="@+id/buttonSignOut"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
         app:layout_constraintEnd_toStartOf="@+id/retrieve"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="40dp"/>
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="@+id/buttonSignOut"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/result" />
 
     <Button
         android:id="@+id/retrieve"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="252dp"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="#6200EE"
         android:text="Retrieve Image"
         android:textColor="#FFFFFF"
-        android:backgroundTint="#6200EE"
-        app:layout_constraintTop_toBottomOf="@+id/buttonSignOut"
-        app:layout_constraintStart_toEndOf="@+id/saveImageButton"
-        android:layout_marginStart="60dp"
-        android:layout_marginTop="24dp"/>
-
-
-
+        app:layout_constraintRight_toLeftOf="@+id/buttonSignOut"
+        app:layout_constraintStart_toStartOf="@+id/imageView"
+        app:layout_constraintTop_toBottomOf="@+id/result" />
 
     <TextView
         android:id="@+id/result"

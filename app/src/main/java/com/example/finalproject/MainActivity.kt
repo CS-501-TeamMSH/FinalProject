@@ -23,6 +23,7 @@ import java.nio.ByteOrder
 import android.text.Html
 import android.view.Gravity
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.google.firebase.storage.FirebaseStorage
 import java.io.ByteArrayOutputStream
@@ -44,6 +45,7 @@ class MainActivity : AppCompatActivity() {
     private var currentImageURL: String? = null
     private var currentTextURL: String? = null
 
+    private val WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 123
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -196,9 +198,19 @@ class MainActivity : AppCompatActivity() {
 
                 3 -> {
                     // Camera
-                    val photo: Bitmap = data?.extras?.get("data") as Bitmap
-                    val uri = getImageUri(photo)
-                    displayImage(uri)
+                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                        // Permission is granted, proceed with capturing image and getting URI
+                        val photo: Bitmap = data?.extras?.get("data") as Bitmap
+                        val uri = getImageUri(photo)
+                        displayImage(uri)
+                    } else {
+                        // Permission is not granted, request it
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                            WRITE_EXTERNAL_STORAGE_REQUEST_CODE
+                        )
+                    }
                 }
             }
         }
@@ -307,4 +319,25 @@ class MainActivity : AppCompatActivity() {
 
         return byteBuffer
     }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            WRITE_EXTERNAL_STORAGE_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted, proceed with capturing image and getting URI
+                    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    startActivityForResult(cameraIntent, 3)
+                } else {
+                    // Permission denied
+                    Log.e("MainActivity", "Failed to insert image into model due to lack of permission")
+                }
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 }
+
