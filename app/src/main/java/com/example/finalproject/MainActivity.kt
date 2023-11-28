@@ -23,8 +23,10 @@ import java.nio.ByteOrder
 import android.text.Html
 import android.view.Gravity
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.google.firebase.storage.FirebaseStorage
+import com.squareup.picasso.Picasso
 import java.io.ByteArrayOutputStream
 import java.util.UUID
 
@@ -41,9 +43,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firebaseStorage: FirebaseStorage
 
-    private var currentImageURL: String? = null
-    private var currentTextURL: String? = null
 
+    private val WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 123
+    private val savedImageAndTextSet = HashSet<String>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -118,8 +120,8 @@ class MainActivity : AppCompatActivity() {
                 val drawableBitmap = (imageView.drawable).toBitmap()
 
                 // Store the bitmap image and the classification text
-                storeImageAndClassification(drawableBitmap, result.text.toString())
-                Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
+//                storeImageAndClassification(drawableBitmap, result.text.toString())
+                preventFirebaseDuplicates(drawableBitmap, result.text.toString())
             } else {
                 // Handle the case when no image is displayed
                 Log.e("MainActivity", "No image to save.")
@@ -135,9 +137,67 @@ class MainActivity : AppCompatActivity() {
 
     }
     private fun retrieveImageAndClassification() {
-        // val storageRef = firebaseStorage.reference
+        val storageRef = firebaseStorage.reference
+        val imagesRef = storageRef.child("images")
+        val textRef = storageRef.child("classification")
 
-        Toast.makeText(this, "TODO", Toast.LENGTH_SHORT).show()
+        // Retrieve the image and text URLs from Firebase Storage
+        imagesRef.listAll()
+            .addOnSuccessListener { listResult ->
+                for (item in listResult.items) {
+                    item.downloadUrl.addOnSuccessListener { imageUrl ->
+                        Log.d("MainActivity", "Retrieved image URL: $imageUrl")
+                        // load image
+                        Picasso.get().load(imageUrl)
+                            .error(android.R.drawable.ic_dialog_alert)
+                            .into(imageView)
+
+                    }.addOnFailureListener { e ->
+                        Log.e("MainActivity", "Failed to retrieve image URL: ${e.message}")
+                    }
+//                    break
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Failed to retrieve image URLs: ${e.message}")
+            }
+
+        textRef.listAll()
+            .addOnSuccessListener { listResult ->
+                for (item in listResult.items) {
+                    val textUrl = item.downloadUrl.toString()
+                    Log.d("MainActivity", "Retrieved text URL: $textUrl")
+                    // load text
+                    textRef.child(item.name).getBytes(Long.MAX_VALUE)
+                        .addOnSuccessListener { bytes ->
+                            val classificationText = String(bytes, Charsets.UTF_8)
+                            result.text = classificationText
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("MainActivity", "Failed to retrieve classification text: ${e.message}")
+                        }
+//                    break
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Failed to retrieve text URLs: ${e.message}")
+            }
+
+        Toast.makeText(this, "Retrieving image and text URLs...", Toast.LENGTH_SHORT).show()
+    }
+
+    private fun preventFirebaseDuplicates(bitmap: Bitmap, classificationText: String) {
+        val imageKey = bitmap.getAllocationByteCount().toString()
+        val imageAndTextKey = "$imageKey-$classificationText"
+
+        if (!savedImageAndTextSet.contains(imageAndTextKey)) {
+            storeImageAndClassification(bitmap, classificationText)
+            savedImageAndTextSet.add(imageAndTextKey)
+            Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
+        } else {
+            Log.d("MainActivity", "Image and text combination already saved.")
+            Toast.makeText(this, "Image and Text combination already saved!", Toast.LENGTH_SHORT).show()
+        }
     }
 
 
@@ -146,6 +206,7 @@ class MainActivity : AppCompatActivity() {
         val storageRef = firebaseStorage.reference
         val imagesRef = storageRef.child("images/${UUID.randomUUID()}.jpg") // Change the path/name if needed
         val textRef = storageRef.child("classification/${UUID.randomUUID()}.txt")
+
 
         // Convert the bitmap to bytes
         val baos = ByteArrayOutputStream()
@@ -157,7 +218,6 @@ class MainActivity : AppCompatActivity() {
         uploadImageTask.addOnSuccessListener { imageUploadTask ->
             imagesRef.downloadUrl.addOnSuccessListener { imageUrl ->
                 Log.d("MainActivity", "Image uploaded to Firebase Storage. Image URL: $imageUrl")
-
                 // Store the classification text in Firebase Storage
                 val textBytes = classificationText.toByteArray()
                 val uploadTextTask = textRef.putBytes(textBytes)
@@ -196,9 +256,19 @@ class MainActivity : AppCompatActivity() {
 
                 3 -> {
                     // Camera
-                    val photo: Bitmap = data?.extras?.get("data") as Bitmap
-                    val uri = getImageUri(photo)
-                    displayImage(uri)
+                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                        // Permission is granted, proceed with capturing image and getting URI
+                        val photo: Bitmap = data?.extras?.get("data") as Bitmap
+                        val uri = getImageUri(photo)
+                        displayImage(uri)
+                    } else {
+                        // Permission is not granted, request it
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                            WRITE_EXTERNAL_STORAGE_REQUEST_CODE
+                        )
+                    }
                 }
             }
         }
@@ -307,4 +377,25 @@ class MainActivity : AppCompatActivity() {
 
         return byteBuffer
     }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            WRITE_EXTERNAL_STORAGE_REQUEST_CODE -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission granted, proceed with capturing image and getting URI
+                    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                    startActivityForResult(cameraIntent, 3)
+                } else {
+                    // Permission denied
+                    Log.e("MainActivity", "Failed to insert image into model due to lack of permission")
+                }
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
 }
+
