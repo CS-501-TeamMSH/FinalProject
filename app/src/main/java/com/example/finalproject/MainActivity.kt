@@ -27,6 +27,11 @@ import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.MessageDigest
@@ -46,9 +51,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var firebaseStorage: FirebaseStorage
 
 
-    private val WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 123
     private val savedImageAndTextSet = HashSet<String>()
     private val savedImageHashes = HashSet<String>()
+
+    private val storedImages = mutableListOf<String>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -100,12 +106,12 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         gallery.setOnClickListener {
             val cameraIntent =
                 Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
             startActivityForResult(cameraIntent, 1)
         }
-
 
 
         signOutButton.setOnClickListener {
@@ -140,52 +146,46 @@ class MainActivity : AppCompatActivity() {
         //TODO: Prevent duplicate image + text from being saved
 
     }
+
     private fun retrieveImageAndClassification() {
         val storageRef = firebaseStorage.reference
         val imagesRef = storageRef.child("images")
         val textRef = storageRef.child("classification")
 
-        // Retrieve the image and text URLs from Firebase Storage
-        imagesRef.listAll()
-            .addOnSuccessListener { listResult ->
-                for (item in listResult.items) {
-                    item.downloadUrl.addOnSuccessListener { imageUrl ->
-                        Log.d("MainActivity", "Retrieved image URL: $imageUrl")
-                        // load image
-                        Picasso.get().load(imageUrl)
-                            .error(android.R.drawable.ic_dialog_alert)
-                            .into(imageView)
+        CoroutineScope(Dispatchers.Main).launch {
+            try {
+                val imageListResult = imagesRef.listAll().await()
+                val textListResult = textRef.listAll().await()
 
-                    }.addOnFailureListener { e ->
-                        Log.e("MainActivity", "Failed to retrieve image URL: ${e.message}")
-                    }
-//                    break
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("MainActivity", "Failed to retrieve image URLs: ${e.message}")
-            }
+                for (i in imageListResult.items.indices) {
+                    val imageUrl = imageListResult.items[i].downloadUrl.await()
+                    Log.d("MainActivity", "Retrieved image URL: $imageUrl")
 
-        textRef.listAll()
-            .addOnSuccessListener { listResult ->
-                for (item in listResult.items) {
-                    val textUrl = item.downloadUrl.toString()
+                    // Load image
+                    Picasso.get().load(imageUrl)
+                        .error(android.R.drawable.ic_dialog_alert)
+                        .into(imageView)
+
+                    delay(2000) // 2-second delay
+
+                    val textUrl = textListResult.items.getOrElse(i) {
+                        textRef.child("default")
+                            .also { Log.e("MainActivity", "No corresponding text found for image") }
+                    }.downloadUrl.await()
                     Log.d("MainActivity", "Retrieved text URL: $textUrl")
-                    // load text
-                    textRef.child(item.name).getBytes(Long.MAX_VALUE)
-                        .addOnSuccessListener { bytes ->
-                            val classificationText = String(bytes, Charsets.UTF_8)
-                            result.text = classificationText
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("MainActivity", "Failed to retrieve classification text: ${e.message}")
-                        }
-//                    break
+
+                    // Load text
+                    val bytes =
+                        textRef.child(textListResult.items[i].name).getBytes(Long.MAX_VALUE).await()
+                    val classificationText = String(bytes, Charsets.UTF_8)
+                    result.text = classificationText
+
+                    delay(2000) // 2-second delay
                 }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Failed to retrieve image or text URLs: ${e.message}")
             }
-            .addOnFailureListener { e ->
-                Log.e("MainActivity", "Failed to retrieve text URLs: ${e.message}")
-            }
+        }
 
         Toast.makeText(this, "Retrieving image and text URLs...", Toast.LENGTH_SHORT).show()
     }
@@ -248,7 +248,7 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun preventFirebaseDuplicates(bitmap: Bitmap, classificationText: String) {
-       //loadExistingImageUUIDs()
+        loadExistingImageUUIDs()
         loadExistingImageHashes()
 
         val baos = ByteArrayOutputStream()
@@ -273,9 +273,10 @@ class MainActivity : AppCompatActivity() {
     private fun storeImageAndClassification(bitmap: Bitmap, classificationText: String) {
         val storageRef = firebaseStorage.reference
         val pairUUID = UUID.randomUUID().toString() // Generate a single UUID for image-text pair
-
-        val imagesRef = storageRef.child("images/$pairUUID.jpg") // Image path with the same pair UUID
-        val textRef = storageRef.child("classification/$pairUUID.txt") // Text path with the same pair UUID
+        val imagesRef =
+            storageRef.child("images/$pairUUID.jpg") // Image path with the same pair UUID
+        val textRef =
+            storageRef.child("classification/$pairUUID.txt") // Text path with the same pair UUID
 
         // Convert the bitmap to bytes
         val baos = ByteArrayOutputStream()
@@ -293,14 +294,20 @@ class MainActivity : AppCompatActivity() {
                 val uploadTextTask = textRef.putBytes(textBytes)
                 uploadTextTask.addOnSuccessListener { textUploadTask ->
                     textRef.downloadUrl.addOnSuccessListener { textUrl ->
-                        Log.d("MainActivity", "Classification text uploaded to Firebase Storage. Text URL: $textUrl")
+                        Log.d(
+                            "MainActivity",
+                            "Classification text uploaded to Firebase Storage. Text URL: $textUrl"
+                        )
                         // Handle success
                     }.addOnFailureListener { textUrlFailure ->
                         Log.e("MainActivity", "Failed to get text URL: ${textUrlFailure.message}")
                         // Handle failure
                     }
                 }.addOnFailureListener { textUploadFailure ->
-                    Log.e("MainActivity", "Error uploading classification text: ${textUploadFailure.message}")
+                    Log.e(
+                        "MainActivity",
+                        "Error uploading classification text: ${textUploadFailure.message}"
+                    )
                     // Handle failure
                 }
             }.addOnFailureListener { imageUrlFailure ->
@@ -312,7 +319,6 @@ class MainActivity : AppCompatActivity() {
             // Handle failure
         }
     }
-
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -328,19 +334,9 @@ class MainActivity : AppCompatActivity() {
 
                 3 -> {
                     // Camera
-                    if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                        // Permission is granted, proceed with capturing image and getting URI
-                        val photo: Bitmap = data?.extras?.get("data") as Bitmap
-                        val uri = getImageUri(photo)
-                        displayImage(uri)
-                    } else {
-                        // Permission is not granted, request it
-                        ActivityCompat.requestPermissions(
-                            this,
-                            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                            WRITE_EXTERNAL_STORAGE_REQUEST_CODE
-                        )
-                    }
+                    val photo: Bitmap = data?.extras?.get("data") as Bitmap
+                    val uri = getImageUri(photo)
+                    displayImage(uri)
                 }
             }
         }
@@ -399,23 +395,24 @@ class MainActivity : AppCompatActivity() {
         val premiumLabels = listOf("high premium", "medium premium", "low premium")
 
         if (predictedClassLabel == classLabels[1]) { // Check if predicted class is "messy"
-            val messyScore = outputFeature0.floatArray[1]  * 100 // Get messy probability
+            val messyScore = outputFeature0.floatArray[1] * 100 // Get messy probability
             //   val highPremiumProbability = 0.7 * messyScore // Calculate high premium probability
             //     val mediumPremiumProbability = 0.4 * messyScore // Calculate medium premium probability
             //   val lowPremiumProbability = 0.1 * messyScore // Calculate low premium probability
 
             // Determine the predicted premium class based on probabilities
             var predictedPremiumLabel = "Unknown"
-            if ( messyScore  > 0.7) {
+            if (messyScore > 0.7) {
                 predictedPremiumLabel = premiumLabels[0] // Set high premium
-            } else if ( messyScore  > 0.4) {
+            } else if (messyScore > 0.4) {
                 predictedPremiumLabel = premiumLabels[1] // Set medium premium
             } else {
                 predictedPremiumLabel = premiumLabels[2] // Set low premium
             }
 
             // Format and display the result
-            val resultText = "$predictedClassLabel\n $messyScore%"    // Predicted Premium: $predictedPremiumLabel"
+            val resultText =
+                "$predictedClassLabel\n $messyScore%"    // Predicted Premium: $predictedPremiumLabel"
             result.text = Html.fromHtml(resultText, Html.FROM_HTML_MODE_COMPACT)
             result.gravity = Gravity.CENTER
             // storeClassificationText(resultText)
@@ -450,23 +447,4 @@ class MainActivity : AppCompatActivity() {
         return byteBuffer
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<String>,
-        grantResults: IntArray
-    ) {
-        when (requestCode) {
-            WRITE_EXTERNAL_STORAGE_REQUEST_CODE -> {
-                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission granted, proceed with capturing image and getting URI
-                    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                    startActivityForResult(cameraIntent, 3)
-                } else {
-                    // Permission denied
-                    Log.e("MainActivity", "Failed to insert image into model due to lack of permission")
-                }
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    }
 }
