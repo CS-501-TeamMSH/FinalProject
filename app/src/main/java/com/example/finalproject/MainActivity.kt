@@ -28,6 +28,8 @@ import androidx.core.graphics.drawable.toBitmap
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
 import java.io.ByteArrayOutputStream
+import java.math.BigInteger
+import java.security.MessageDigest
 import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
@@ -46,6 +48,7 @@ class MainActivity : AppCompatActivity() {
 
     private val WRITE_EXTERNAL_STORAGE_REQUEST_CODE = 123
     private val savedImageAndTextSet = HashSet<String>()
+    private val savedImageHashes = HashSet<String>()
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -121,6 +124,7 @@ class MainActivity : AppCompatActivity() {
 
                 // Store the bitmap image and the classification text
 //                storeImageAndClassification(drawableBitmap, result.text.toString())
+
                 preventFirebaseDuplicates(drawableBitmap, result.text.toString())
             } else {
                 // Handle the case when no image is displayed
@@ -186,27 +190,92 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "Retrieving image and text URLs...", Toast.LENGTH_SHORT).show()
     }
 
-    private fun preventFirebaseDuplicates(bitmap: Bitmap, classificationText: String) {
-        val imageKey = bitmap.getAllocationByteCount().toString()
-        val imageAndTextKey = "$imageKey-$classificationText"
+    private fun loadExistingImageUUIDs() {
+        val storageRef = firebaseStorage.reference
+        val imagesRef = storageRef.child("images")
 
-        if (!savedImageAndTextSet.contains(imageAndTextKey)) {
-            storeImageAndClassification(bitmap, classificationText)
-            savedImageAndTextSet.add(imageAndTextKey)
-            Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
-        } else {
-            Log.d("MainActivity", "Image and text combination already saved.")
-            Toast.makeText(this, "Image and Text combination already saved!", Toast.LENGTH_SHORT).show()
-        }
+        imagesRef.listAll()
+            .addOnSuccessListener { listResult ->
+                for (item in listResult.items) {
+                    // Get the full name of the image (with extension) and extract the UUID part
+                    val fullName = item.name
+                    val parts = fullName.split(".")
+                    if (parts.isNotEmpty()) {
+                        val uuid = parts[0] // Extract UUID part
+                        savedImageAndTextSet.add(uuid)
+                    }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Failed to retrieve image UUIDs: ${e.message}")
+            }
+    }
+
+    private fun loadExistingImageHashes() {
+        val storageRef = firebaseStorage.reference
+        val imagesRef = storageRef.child("images")
+
+        imagesRef.listAll()
+            .addOnSuccessListener { listResult ->
+                for (item in listResult.items) {
+                    // Fetch the image bytes
+                    item.getBytes(Long.MAX_VALUE)
+                        .addOnSuccessListener { bytes ->
+                            // Calculate the hash of the image data
+                            val imageHash = calculateHash(bytes)
+                            savedImageHashes.add(imageHash)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("MainActivity", "Failed to fetch image bytes: ${e.message}")
+                        }
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e("MainActivity", "Failed to retrieve image list: ${e.message}")
+            }
+    }
+
+    private fun calculateHash(imageBytes: ByteArray): String {
+        // Use your preferred hashing algorithm (e.g., MD5 or SHA-256)
+        // Here's an example using MD5 (for simplicity, use a better hashing algorithm in production)
+        val md = MessageDigest.getInstance("MD5")
+        val digest = md.digest(imageBytes)
+
+        // Convert byte array to hexadecimal representation
+        return BigInteger(1, digest).toString(16).padStart(32, '0') // For MD5 hash (32 characters)
+        // For SHA-256, replace "MD5" with "SHA-256" and adjust padding accordingly
     }
 
 
-    // Add this function to store the image and classification text to Firebase Storage
+    private fun preventFirebaseDuplicates(bitmap: Bitmap, classificationText: String) {
+       //loadExistingImageUUIDs()
+        loadExistingImageHashes()
+
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val imageData = baos.toByteArray()
+
+        // Calculate hash of the image data
+        val imageHash = calculateHash(imageData)
+
+        if (!savedImageHashes.contains(imageHash)) {
+            // If the hash doesn't exist, store the image and update the hash set
+            storeImageAndClassification(bitmap, classificationText)
+            savedImageHashes.add(imageHash)
+            Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
+        } else {
+            Log.d("MainActivity", "Image already exists.")
+            Toast.makeText(this, "Image already exists!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Add an additional parameter imageUUID for the image UUID
     private fun storeImageAndClassification(bitmap: Bitmap, classificationText: String) {
         val storageRef = firebaseStorage.reference
-        val imagesRef = storageRef.child("images/${UUID.randomUUID()}.jpg") // Change the path/name if needed
-        val textRef = storageRef.child("classification/${UUID.randomUUID()}.txt")
+        val pairUUID = UUID.randomUUID().toString() // Generate a single UUID for image-text pair
 
+        val imagesRef = storageRef.child("images/$pairUUID.jpg") // Image path with the same pair UUID
+        val textRef = storageRef.child("classification/$pairUUID.txt") // Text path with the same pair UUID
 
         // Convert the bitmap to bytes
         val baos = ByteArrayOutputStream()
@@ -218,6 +287,7 @@ class MainActivity : AppCompatActivity() {
         uploadImageTask.addOnSuccessListener { imageUploadTask ->
             imagesRef.downloadUrl.addOnSuccessListener { imageUrl ->
                 Log.d("MainActivity", "Image uploaded to Firebase Storage. Image URL: $imageUrl")
+
                 // Store the classification text in Firebase Storage
                 val textBytes = classificationText.toByteArray()
                 val uploadTextTask = textRef.putBytes(textBytes)
@@ -242,6 +312,8 @@ class MainActivity : AppCompatActivity() {
             // Handle failure
         }
     }
+
+
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
@@ -398,4 +470,3 @@ class MainActivity : AppCompatActivity() {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 }
-
