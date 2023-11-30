@@ -97,22 +97,43 @@ class LoginActivity : AppCompatActivity() {
                             auth.createUserWithEmailAndPassword(enteredUsername, enteredPassword)
                                 .addOnCompleteListener(this) { task ->
                                     if (task.isSuccessful) {
-                                        Toast.makeText(
-                                            this, "Registration successful.",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                                        auth.currentUser?.sendEmailVerification()
+                                            ?.addOnCompleteListener { emailVerificationTask ->
+                                                if (emailVerificationTask.isSuccessful) {
+                                                    // Check if the email is verified
+                                                    if (auth.currentUser?.isEmailVerified == true) {
+                                                        // Email verified, show success message
+                                                        Toast.makeText(
+                                                            this, "Registration successful.",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
 
-                                        // Automatically signs in the newly registered user
-                                        auth.signInWithEmailAndPassword(enteredUsername, enteredPassword)
-                                            .addOnCompleteListener { signInTask ->
-                                                if (signInTask.isSuccessful) {
-                                                    val intent = Intent(this, MainActivity::class.java)
-                                                    intent.putExtra("USERNAME_EXTRA", enteredUsername)
-                                                    startActivity(intent)
-                                                    finish()
+                                                        // Log the user in after registration
+                                                        auth.signInWithEmailAndPassword(enteredUsername, enteredPassword)
+                                                            .addOnCompleteListener { signInTask ->
+                                                                if (signInTask.isSuccessful) {
+                                                                    val intent = Intent(this, MainActivity::class.java)
+                                                                    intent.putExtra("USERNAME_EXTRA", enteredUsername)
+                                                                    startActivity(intent)
+                                                                    finish()
+                                                                } else {
+                                                                    Toast.makeText(
+                                                                        this, "Sign-in after registration failed.",
+                                                                        Toast.LENGTH_SHORT
+                                                                    ).show()
+                                                                }
+                                                            }
+                                                    } else {
+                                                        // Email not verified yet
+                                                        Toast.makeText(
+                                                            this, "Please verify your email...",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    }
                                                 } else {
+                                                    // Email verification sending failed
                                                     Toast.makeText(
-                                                        this, "Sign-in after registration failed.",
+                                                        this, "Failed to send verification email.",
                                                         Toast.LENGTH_SHORT
                                                     ).show()
                                                 }
@@ -134,6 +155,7 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
         }
+
 
 
 
