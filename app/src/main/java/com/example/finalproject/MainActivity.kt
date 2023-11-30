@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
     private val savedImageHashes = HashSet<String>()
 
     private val storedImages = mutableListOf<String>()
-
+    private lateinit var currentUserID: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +73,10 @@ class MainActivity : AppCompatActivity() {
         val username = intent.getStringExtra("USERNAME_EXTRA")
         val signOutButton = findViewById<Button>(R.id.buttonSignOut)
 
+        val currentUser = firebaseAuth.currentUser
+        currentUserID = currentUser?.uid ?: ""
 
+        //Retrieve user's ID
         val saveButton = findViewById<Button>(R.id.saveImageButton)
         val retrieveButton = findViewById<Button>(R.id.retrieve)
 
@@ -90,6 +93,8 @@ class MainActivity : AppCompatActivity() {
         //Retrieve stored name!
         val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
         val savedUsername = sharedPreferences.getString("Username", "")
+
+
 
         if (!savedUsername.isNullOrEmpty()) {
             welcomeTextView.text = "Welcome, $savedUsername"
@@ -149,8 +154,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun retrieveImageAndClassification() {
         val storageRef = firebaseStorage.reference
-        val imagesRef = storageRef.child("images")
-        val textRef = storageRef.child("classification")
+        val imagesRef = storageRef.child("images/$currentUserID")  // retrieve based on user Id --> helps create independent views!
+        val textRef = storageRef.child("classification/$currentUserID")
 
         CoroutineScope(Dispatchers.Main).launch {
             try {
@@ -180,14 +185,15 @@ class MainActivity : AppCompatActivity() {
                     val classificationText = String(bytes, Charsets.UTF_8)
                     result.text = classificationText
 
-                    delay(2000) // 2-second delay
+                    delay(2000)
                 }
+                Toast.makeText(this@MainActivity, "Finished retrieving images", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.e("MainActivity", "Failed to retrieve image or text URLs: ${e.message}")
             }
         }
 
-        Toast.makeText(this, "Retrieving image and text URLs...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Retrieving images.", Toast.LENGTH_SHORT).show()
     }
 
     private fun loadExistingImageUUIDs() {
@@ -274,9 +280,9 @@ class MainActivity : AppCompatActivity() {
         val storageRef = firebaseStorage.reference
         val pairUUID = UUID.randomUUID().toString() // Generate a single UUID for image-text pair
         val imagesRef =
-            storageRef.child("images/$pairUUID.jpg") // Image path with the same pair UUID
+            storageRef.child("images/$currentUserID/$pairUUID.jpg") // creates separate folders for each user!!!
         val textRef =
-            storageRef.child("classification/$pairUUID.txt") // Text path with the same pair UUID
+            storageRef.child("classification/$currentUserID/$pairUUID.txt")
 
         // Convert the bitmap to bytes
         val baos = ByteArrayOutputStream()
