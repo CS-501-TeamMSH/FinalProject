@@ -57,6 +57,7 @@ class MainActivity : AppCompatActivity() {
     private val storedImages = mutableListOf<String>()
     private lateinit var currentUserID: String
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:cardBackgroundColor="@color/md_theme_surfaceVariant"
+    app:cardCornerRadius="16dp">
+
+    <LinearLayout
+        android:layout_width="350dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/take_photo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/take_picture"
+            android:paddingTop="24dp"
+            android:paddingBottom="16dp"
+            android:textSize="16sp"
+            android:paddingHorizontal="24dp"
+            android:drawablePadding="16dp"
+            android:foreground="?android:selectableItemBackground"
+            android:fontFamily="@font/ubuntu_regular"
+            app:drawableStartCompat="@drawable/round_camera_alt_24"
+            app:drawableTint="@color/md_theme_secondary" />
+
+        <TextView
+            android:id="@+id/pick_photo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/pick_photo"
+            android:paddingBottom="24dp"
+            android:paddingTop="16dp"
+            android:paddingHorizontal="24dp"
+            android:foreground="?android:selectableItemBackground"
+            android:textSize="16sp"
+            android:drawablePadding="16dp"
+            android:fontFamily="@font/ubuntu_regular"
+            app:drawableStartCompat="@drawable/gallery_icon"
+            app:drawableTint="@color/md_theme_secondary" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>

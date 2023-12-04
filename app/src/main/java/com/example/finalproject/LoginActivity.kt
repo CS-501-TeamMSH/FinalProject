@@ -11,11 +11,10 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
-import com.google.firebase.Firebase
+import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.auth.auth
 
 class LoginActivity : AppCompatActivity() {
 
@@ -28,9 +27,9 @@ class LoginActivity : AppCompatActivity() {
 
         val editTextUsername = findViewById<EditText>(R.id.editTextUsername)
         val editTextPassword = findViewById<EditText>(R.id.editTextPassword)
-        val buttonLogin = findViewById<Button>(R.id.buttonLogin)
-        val buttonRegister = findViewById<Button>(R.id.buttonRegister) // Add the Register button in your layout XML
-        val buttonGoogle = findViewById<SignInButton>(R.id.googleSignInButton)
+        val buttonLogin = findViewById<Button>(R.id.loginButton)
+        val buttonRegister = findViewById<Button>(R.id.registerButton) // Add the Register button in your layout XML
+        val buttonGoogle = findViewById<MaterialButton>(R.id.googleButton)
         auth = FirebaseAuth.getInstance()
 
         // firebaseAuth = FirebaseAuth.getInstance()
