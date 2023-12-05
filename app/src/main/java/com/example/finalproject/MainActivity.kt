@@ -74,6 +74,13 @@ class MainActivity : AppCompatActivity() {
         val username = intent.getStringExtra("USERNAME_EXTRA")
         val signOutButton = findViewById<Button>(R.id.buttonSignOut)
 
+        // Dash Button
+        val dashButton = findViewById<Button>(R.id.dash)
+        dashButton.setOnClickListener {
+            val intent = Intent(this, DashActivity::class.java)
+            startActivity(intent)
+        }
+
         val currentUser = firebaseAuth.currentUser
         currentUserID = currentUser?.uid ?: ""
 

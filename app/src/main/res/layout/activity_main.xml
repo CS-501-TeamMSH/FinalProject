@@ -127,6 +127,20 @@
         app:cornerRadius="9dp"
         app:layout_constraintLeft_toRightOf="@id/buttonSignOut"
         app:layout_constraintTop_toBottomOf="@+id/result"  />
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/dash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dash"
+        android:layout_marginTop="12dp"
+        android:paddingHorizontal="14dp"
+        android:elevation="1dp"
+        android:stateListAnimator="@null"
+        android:fontFamily="@font/ubuntu_bold"
+        android:textSize="16sp"
+        app:cornerRadius="9dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button2"  />
 
 
     <TextView

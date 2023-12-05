@@ -36,5 +36,12 @@
             android:screenOrientation="portrait">
             <!-- Intent filter for MainActivity, remove MAIN and LAUNCHER -->
         </activity>
+
+        <!-- DashActivity -->
+        <activity
+            android:name=".DashActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+        </activity>
     </application>
 </manifest>
