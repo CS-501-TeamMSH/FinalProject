@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         // Dash Button
         val dashButton = findViewById<Button>(R.id.dash)
         dashButton.setOnClickListener {
-            val intent = Intent(this, DashActivity::class.java)
+            val intent = Intent(this, ChecklistActivity::class.java)
             startActivity(intent)
         }
 
