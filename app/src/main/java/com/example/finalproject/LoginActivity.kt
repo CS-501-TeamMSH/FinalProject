@@ -111,7 +111,7 @@ class LoginActivity : AppCompatActivity() {
                                                         auth.signInWithEmailAndPassword(enteredUsername, enteredPassword)
                                                             .addOnCompleteListener { signInTask ->
                                                                 if (signInTask.isSuccessful) {
-                                                                    val intent = Intent(this, MainActivity::class.java)
+                                                                    val intent = Intent(this, DashActivity::class.java)
                                                                     intent.putExtra("USERNAME_EXTRA", enteredUsername)
                                                                     startActivity(intent)
                                                                     finish()
@@ -218,7 +218,7 @@ class LoginActivity : AppCompatActivity() {
                         editor.apply()
 
 
-                        val intent = Intent(this, MainActivity::class.java)
+                        val intent = Intent(this, DashActivity::class.java)
                         intent.putExtra("USERNAME_EXTRA", username)
                         startActivity(intent)
                         finish()

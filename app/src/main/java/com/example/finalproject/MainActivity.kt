@@ -23,6 +23,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import android.text.Html
 import android.view.Gravity
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -38,13 +39,16 @@ import kotlinx.coroutines.tasks.await
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var camera: Button
-    private lateinit var gallery: Button
+    private lateinit var camera: ImageView
+    private lateinit var gallery: ImageView
     private lateinit var imageView: ImageView
     private lateinit var result: TextView
     private lateinit var save: Button
@@ -69,11 +73,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        camera = findViewById<Button>(R.id.button)
-        gallery = findViewById<Button>(R.id.button2)
+        camera = findViewById<ImageView>(R.id.button)
+        gallery = findViewById<ImageView>(R.id.button2)
 
         result = findViewById(R.id.result)
-        imageView = findViewById(R.id.imageView)
+         imageView = findViewById(R.id.imageView)
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
 
@@ -83,7 +87,6 @@ class MainActivity : AppCompatActivity() {
 
        // val welcomeTextView = findViewById<TextView>(R.id.welcomeTextView)
         //val username = intent.getStringExtra("USERNAME_EXTRA")
-        val signOutButton = findViewById<TextView>(R.id.signOutButton)
 
         // Dash Button
 //        val dashButton = findViewById<Button>(R.id.dash)
@@ -139,12 +142,6 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        signOutButton.setOnClickListener {
-            FirebaseAuth.getInstance().signOut()
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
 
         saveButton.setOnClickListener {
             // Check if an image is displayed in the ImageView
@@ -302,7 +299,7 @@ class MainActivity : AppCompatActivity() {
             // If the hash doesn't exist, store the image and update the hash set
             storeImageAndClassification(bitmap, classificationText)
             savedImageHashes.add(imageHash)
-            Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
         } else {
             Log.d("MainActivity", "Image already exists.")
             Toast.makeText(this, "Image already exists!", Toast.LENGTH_SHORT).show()
@@ -364,19 +361,24 @@ class MainActivity : AppCompatActivity() {
                         val docRef = firebaseDB.collection("images")
                             .document() // Use auto-generated ID for the document
 
+                        val timestamp = System.currentTimeMillis()
+                        val date = Date(timestamp)
+                        val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                        val formattedDate = formatter.format(date)
+
                         // Create a data object to be stored in Firestore
                         val data = hashMapOf(
                             "imageUrl" to imageUrl.toString(), // Replace imageUrl with the actual URL obtained
                             "textUrl" to textUrl.toString(), // Replace textUrl with the actual URL obtained
                             "classification" to classificationText,
                             "userId" to currentUserID,
-                            "timestamp" to System.currentTimeMillis() // Add current time as a timestamp
+                            "timestamp" to formattedDate // Add current time as a timestamp
                         )
 
                         // Save the data into Firestore
                         docRef.set(data)
                             .addOnSuccessListener {
-                                Toast.makeText(this, "Uploaded Successfully", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this, "Uploaded to Dashboard!", Toast.LENGTH_SHORT).show()
                                 Log.d("MainActivity", "Image data saved successfully to Firestore")
                             }
                             .addOnFailureListener { e ->

@@ -2,6 +2,7 @@ package com.example.finalproject
 
 import android.Manifest
 import android.app.Activity
+import android.app.DatePickerDialog
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -40,6 +41,7 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
@@ -54,6 +56,8 @@ class DashActivity : AppCompatActivity() {
     private val GALLERY_REQUEST_CODE = 102
     private var imageUri: Uri? = null
 
+    private lateinit var calendar: ImageButton
+
     private lateinit var signOut: TextView
 
     private lateinit var camera: Button
@@ -64,6 +68,7 @@ class DashActivity : AppCompatActivity() {
     private lateinit var retrieveButton: Button
     private val imageSize = 224
 
+    private lateinit var title: TextView
 
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firebaseStorage: FirebaseStorage
@@ -74,17 +79,22 @@ class DashActivity : AppCompatActivity() {
     private val savedImageAndTextSet = HashSet<String>()
     private val savedImageHashes = HashSet<String>()
 
+    private val calendarIcon = Calendar.getInstance()
+
     private val storedImages = mutableListOf<String>()
+    private lateinit var date: TextView
     private lateinit var currentUserID: String
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dash)
 
-        val date: TextView = findViewById<TextView>(R.id.date)
+        date = findViewById<TextView>(R.id.date)
+
         val today = Date()
-        val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
         val formattedDate: String = dateFormat.format(today)
         date.text = formattedDate
+        fetchImageUrlsFromFirestore()
 
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
@@ -96,13 +106,45 @@ class DashActivity : AppCompatActivity() {
 
         buttonAdd = findViewById<ImageButton>(R.id.addImage)
 
-        signOut= findViewById<TextView>(R.id.signOutButton)
+        signOut = findViewById<TextView>(R.id.signOutButton)
+
+        calendar = findViewById<ImageButton>(R.id.calendarButton)
 
         // Fetch image URLs from Firebase Firestore
         fetchImageUrlsFromFirestore()
 
         buttonAdd.setOnClickListener {
             showPictureDialog()
+        }
+        calendar.setOnClickListener {
+            Toast.makeText(this, "Testing", Toast.LENGTH_SHORT).show()
+            //TODO("Generate calendar function")
+
+            val datePickerDialog = DatePickerDialog(
+                this, { _, year, month, dayOfMonth ->
+                    calendarIcon.set(Calendar.YEAR, year)
+                    calendarIcon.set(Calendar.MONTH, month)
+                    calendarIcon.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+
+
+                    val selectedDate = SimpleDateFormat(
+                        "MM/dd/yyyy",
+                        Locale.getDefault()
+                    ).format(calendarIcon.time)
+                    Toast.makeText(this, "Selected Date: $selectedDate", Toast.LENGTH_SHORT).show()
+                    //formattedDate: String = selectedDate.format(selectedDate)
+                    date.text = selectedDate
+                    fetchImageUrlsFromFirestore()
+
+                },
+                calendarIcon.get(Calendar.YEAR),
+                calendarIcon.get(Calendar.MONTH),
+                calendarIcon.get(Calendar.DAY_OF_MONTH)
+
+            )
+
+            // Show the DatePickerDialog
+            datePickerDialog.show()
         }
 
 
@@ -122,6 +164,7 @@ class DashActivity : AppCompatActivity() {
                     // For example, do something for the Dashboard item
                     true
                 }
+
                 R.id.navigation_profile -> {
                     // Handle Upload Image item click
                     // For example, navigate to MainActivity
@@ -129,10 +172,14 @@ class DashActivity : AppCompatActivity() {
                     startActivity(intent)
                     true
                 }
+
                 else -> false
             }
         }
+
+
     }
+
     private fun showPictureDialog() {
         val pictureDialog = AlertDialog.Builder(this)
         val pictureDialogItems = arrayOf("Photo Gallery", "Take Picture")
@@ -142,7 +189,10 @@ class DashActivity : AppCompatActivity() {
                 1 -> takePhotoFromCamera()
             }
         }
-        pictureDialog.show()
+       // pictureDialog.show()
+        val intent = Intent(this, MainActivity::class.java)
+        startActivity(intent)
+        finish()
     }
 
     // Function to handle capturing an image from the camera
@@ -157,15 +207,17 @@ class DashActivity : AppCompatActivity() {
                 this,
                 arrayOf(Manifest.permission.CAMERA),
                 CAMERA_PERMISSION_CODE
+
             )
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
         } else {
             val values = ContentValues()
             values.put(MediaStore.Images.Media.TITLE, "New Picture")
             values.put(MediaStore.Images.Media.DESCRIPTION, "From Camera")
             imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)
-            startActivityForResult(cameraIntent, CAMERA_REQUEST_CODE)
+
         }
     }
 
@@ -184,7 +236,10 @@ class DashActivity : AppCompatActivity() {
                     // Camera photo is captured
                     // You can use imageUri to do whatever you want with the image
                     imageUri?.let { uri ->
-                        displayImage(uri)
+//                        val intent = Intent(this, MainActivity::class.java)
+//                        startActivity(intent)
+//                        finish()
+                           displayImage(uri)
                     }
                 }
 
@@ -353,8 +408,8 @@ class DashActivity : AppCompatActivity() {
                         // Save the data into Firestore
                         docRef.set(data)
                             .addOnSuccessListener {
-                               // Toast.makeText(this, "Uploaded Successfully", Toast.LENGTH_SHORT)
-                              //     .show()
+                                // Toast.makeText(this, "Uploaded Successfully", Toast.LENGTH_SHORT)
+                                //     .show()
                                 Log.d("MainActivity", "Image data saved successfully to Firestore")
                             }
                             .addOnFailureListener { e ->
@@ -404,14 +459,12 @@ class DashActivity : AppCompatActivity() {
 
     private fun fetchImageUrlsFromFirestore() {
         val items = mutableListOf<Item>()
-
-        // Assuming currentUserID contains the ID of the current logged-in user
+        //date needs to be globall -- fixed
         val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
-
-        // Ensure currentUserID is not null before querying Firestore
         currentUserID?.let { uid ->
             firestoreDB.collection("images")
-                .whereEqualTo("userId", uid) // Fetch images for the current user ID
+                .whereEqualTo("userId", uid)
+                .whereEqualTo("timestamp", date.text.toString())
                 .get()
                 .addOnSuccessListener { result ->
                     for (document in result) {
@@ -422,26 +475,22 @@ class DashActivity : AppCompatActivity() {
                         }
                     }
 
-                    // Display the fetched images in RecyclerView
+                    val adapter: ImageAdapter
                     if (items.isEmpty()) {
                         val noImageText = findViewById<TextView>(R.id.noImageText)
-                        noImageText.text = "No Spaces Submitted Today"
+                        noImageText.text = "No Spaces Submitted "
                         val noImageButton: Button = findViewById(R.id.noImageAddButton)
-                        noImageButton.visibility = View.VISIBLE
-                        noImageButton.setOnClickListener {
-                            val intent = Intent(this, MainActivity::class.java)
-                            startActivity(intent)
-                        }
+                       // noImageButton.visibility = View.VISIBLE
+                        adapter = ImageAdapter(items) // Pass an empty list to the adapter
                     } else {
-                        val adapter = ImageAdapter(items)
-                        recyclerView.adapter = adapter
+                        adapter = ImageAdapter(items)
                     }
+                    recyclerView.adapter = adapter
                 }
                 .addOnFailureListener { exception ->
-                    // Handle any errors that may occur while fetching data from Firestore
                     exception.printStackTrace()
                 }
         }
     }
-}
 
+}
