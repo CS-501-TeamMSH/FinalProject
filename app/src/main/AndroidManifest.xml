@@ -30,21 +30,25 @@
         </activity>
 
         <!-- MainActivity -->
-<!--        <activity-->
-<!--            android:name=".MainActivity"-->
-<!--            android:exported="true"-->
-<!--            android:screenOrientation="portrait">-->
-<!--            &lt;!&ndash; Intent filter for MainActivity, remove MAIN and LAUNCHER &ndash;&gt;-->
-<!--        </activity>-->
-
-        <!-- MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:screenOrientation="portrait">
         </activity>
 
-        <activity android:name=".ImageDetailActivity" />
+        <!-- ImageDetailActivity -->
+        <activity
+            android:name=".ImageDetailActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+        </activity>
+
+        <!-- ToDoListActivity -->
+        <activity
+            android:name=".ToDoListActivity"
+            android:exported="true"
+            android:screenOrientation="portrait">
+        </activity>
 
     </application>
 </manifest>
