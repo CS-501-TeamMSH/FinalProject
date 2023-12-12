@@ -2,7 +2,9 @@ package com.example.finalproject
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
+import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +34,10 @@ class ToDoListActivity : AppCompatActivity() {
         val secondMenuItem = menu.getItem(1)
         secondMenuItem.isChecked = true
 
+        buttonAddTodo.setOnClickListener{
+            onAddTodoClick(buttonAddTodo)
+        }
+
         signOut.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
             val intent = Intent(this, LoginActivity::class.java)
@@ -57,8 +63,26 @@ class ToDoListActivity : AppCompatActivity() {
         populateTodoList()
     }
 
-    fun onAddTodoClick(view: android.view.View) {
+    fun onAddTodoClick(anchorView: View) {
         Toast.makeText(this, "Add Todo clicked", Toast.LENGTH_SHORT).show()
+        val popupMenu = PopupMenu(this, anchorView)
+        popupMenu.menuInflater.inflate(R.menu.your_menu_resource, popupMenu.menu)
+
+        popupMenu.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.menu_gallery -> {
+//                    choosePhotoFromGallery()
+                    true
+                }
+
+                R.id.menu_take_picture -> {
+//                    takePhotoFromCamera()
+                    true
+                }
+
+                else -> false
+            }
+        }
     }
 
     private fun populateTodoList() {

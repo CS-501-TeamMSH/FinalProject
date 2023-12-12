@@ -127,18 +127,9 @@ class MainActivity : AppCompatActivity() {
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.navigation_home -> {
-                    // Handle Dashboard item click
-                    // For example, do something for the Dashboard item
                     true
                 }
 
-//                R.id.navigation_profile -> {
-//                    // Handle Upload Image item click
-//                    // For example, navigate to MainActivity
-//                    val intent = Intent(this, MainActivity::class.java)
-//                    startActivity(intent)
-//                    true
-//                }
                 R.id.navigation_ToDo -> {
                     val intent = Intent(this, ToDoListActivity::class.java)
                     startActivity(intent)
