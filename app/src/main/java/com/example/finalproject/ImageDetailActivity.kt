@@ -70,7 +70,8 @@ class ImageDetailActivity : AppCompatActivity() {
             val cancelButton = findViewById<Button>(R.id.cancelButton)
 
             saveButton.setOnClickListener {
-                preventFirebaseDuplicates(bitmap, result.text.toString())
+                preventFirebaseDuplicates(resizedBitmap, result.text.toString())
+
             }
             cancelButton.setOnClickListener {
                 // Finish the activity when the cancel button is clicked

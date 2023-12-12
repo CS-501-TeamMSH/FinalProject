@@ -87,7 +87,6 @@ class MainActivity : AppCompatActivity() {
             showPictureDialog(buttonAdd)
         }
         calendar.setOnClickListener {
-            Toast.makeText(this, "Testing", Toast.LENGTH_SHORT).show()
 
             val datePickerDialog = DatePickerDialog(
                 this, { _, year, month, dayOfMonth ->
@@ -140,6 +139,11 @@ class MainActivity : AppCompatActivity() {
 //                    startActivity(intent)
 //                    true
 //                }
+                R.id.navigation_ToDo -> {
+                    val intent = Intent(this, ToDoListActivity::class.java)
+                    startActivity(intent)
+                    true
+                }
 
                 else -> false
             }
@@ -248,7 +252,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun fetchImageUrlsFromFirestore() {
         val items = mutableListOf<Item>()
-        //date needs to be globall -- fixed
+        //date needs to be global -- fixed
         val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
         currentUserID?.let { uid ->
             firestoreDB.collection("images")

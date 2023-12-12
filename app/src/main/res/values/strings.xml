@@ -14,4 +14,5 @@
         <string name="take_picture">Take Picture</string>
     <string name="menu_gallery">Photo Gallery</string>
     <string name="menu_take_picture">Take Picture</string>
+    <string name="todoText" />
 </resources>
