@@ -12,4 +12,6 @@
         <string name="sign_out">Sign out</string>
         <string name="pick_photo">Pick Photo</string>
         <string name="take_picture">Take Picture</string>
-    </resources>
+    <string name="menu_gallery">Photo Gallery</string>
+    <string name="menu_take_picture">Take Picture</string>
+</resources>
