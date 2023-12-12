@@ -28,6 +28,7 @@ class ToDoAdapter : RecyclerView.Adapter<ToDoAdapter.ViewHolder>() {
     fun updateData(newTodoItems: List<ToDoItem>) {
         todoItems = newTodoItems
         notifyDataSetChanged()
+//        Log.d("ToDoAdapter", "Data updated: $newTodoItems")
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -35,6 +36,7 @@ class ToDoAdapter : RecyclerView.Adapter<ToDoAdapter.ViewHolder>() {
         private val todoCheckbox: CheckBox = itemView.findViewById(R.id.todoCheckBox)
 
         fun bind(todoItem: ToDoItem) {
+//            Toast.makeText(itemView.context, "Todo Text: ${todoItem.text}", Toast.LENGTH_SHORT).show()
             todoTitle.text = todoItem.text
             todoCheckbox.isChecked = todoItem.checked
         }
