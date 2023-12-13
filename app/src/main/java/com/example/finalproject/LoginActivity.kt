@@ -62,8 +62,8 @@ class LoginActivity : AppCompatActivity() {
                             this, "Authentication successful.",
                             Toast.LENGTH_SHORT
                         ).show()
-                        val intent = Intent(this, MainActivity::class.java)
-                        intent.putExtra("USERNAME_EXTRA", enteredUsername) // Set extra here
+                        val intent = Intent(this, DashActivity::class.java)
+                        //intent.putExtra("USERNAME_EXTRA", enteredUsername) // Set extra here
                         startActivity(intent) // Start the MainActivity
                         finish() // Finish the LoginActivity
                     } else {
@@ -111,7 +111,7 @@ class LoginActivity : AppCompatActivity() {
                                                         auth.signInWithEmailAndPassword(enteredUsername, enteredPassword)
                                                             .addOnCompleteListener { signInTask ->
                                                                 if (signInTask.isSuccessful) {
-                                                                    val intent = Intent(this, MainActivity::class.java)
+                                                                    val intent = Intent(this, DashActivity::class.java)
                                                                     intent.putExtra("USERNAME_EXTRA", enteredUsername)
                                                                     startActivity(intent)
                                                                     finish()
@@ -218,7 +218,7 @@ class LoginActivity : AppCompatActivity() {
                         editor.apply()
 
 
-                        val intent = Intent(this, MainActivity::class.java)
+                        val intent = Intent(this, DashActivity::class.java)
                         intent.putExtra("USERNAME_EXTRA", username)
                         startActivity(intent)
                         finish()

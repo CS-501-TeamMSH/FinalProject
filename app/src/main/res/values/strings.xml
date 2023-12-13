@@ -1,15 +1,15 @@
 <resources>
     <string name="app_name">FinalProject</string>
     <string name="web_client_id"> 86814511792-q8e7p4bid333jb7tnvo3dimqrc4d91fo.apps.googleusercontent.com </string>
-        <string name="inspectisafe">InspectiSafe</string>
-        <string name="username">username</string>
-        <string name="password">password</string>
-        <string name="login">Login</string>
-        <string name="register">Register</string>
-        <string name="dashboard">Dashboard</string>
-        <string name="save_image">Save Image</string>
-        <string name="retrieve_image">Retrieve Image</string>
-        <string name="sign_out">Sign out</string>
-        <string name="pick_photo">Pick Photo</string>
-        <string name="take_picture">Take Picture</string>
-    </resources>
+    <string name="inspectisafe">InspectiSafe</string>
+    <string name="username">username</string>
+    <string name="password">password</string>
+    <string name="login">Login</string>
+    <string name="register">Register</string>
+    <string name="dashboard">Dashboard</string>
+    <string name="save_image">Save Image</string>
+    <string name="retrieve_image">Retrieve Image</string>
+    <string name="sign_out">Sign out</string>
+    <string name="pick_photo">Pick Photo</string>
+    <string name="take_picture">Take Picture</string>
+</resources>

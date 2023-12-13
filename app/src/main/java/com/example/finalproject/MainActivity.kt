@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -22,9 +23,13 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import android.text.Html
 import android.view.Gravity
+import android.widget.ImageButton
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.graphics.drawable.toBitmap
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.squareup.picasso.Picasso
 import kotlinx.coroutines.CoroutineScope
@@ -35,20 +40,27 @@ import kotlinx.coroutines.tasks.await
 import java.io.ByteArrayOutputStream
 import java.math.BigInteger
 import java.security.MessageDigest
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
+
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var camera: Button
-    private lateinit var gallery: Button
+    private lateinit var camera: ImageView
+    private lateinit var gallery: ImageView
     private lateinit var imageView: ImageView
     private lateinit var result: TextView
     private lateinit var save: Button
-    private lateinit var retrieveButton: Button
+    private lateinit var back: Button
+    ///private lateinit var retrieveButton: Button
     private val imageSize = 224
 
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firebaseStorage: FirebaseStorage
+
+    private lateinit var firebaseDB: FirebaseFirestore
 
 
     private val savedImageAndTextSet = HashSet<String>()
@@ -57,57 +69,60 @@ class MainActivity : AppCompatActivity() {
     private val storedImages = mutableListOf<String>()
     private lateinit var currentUserID: String
 
+    // private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        camera = findViewById<Button>(R.id.button)
-        gallery = findViewById<Button>(R.id.button2)
+        camera = findViewById<ImageView>(R.id.button)
+        gallery = findViewById<ImageView>(R.id.button2)
+        back = findViewById<Button>(R.id.backButton)
 
         result = findViewById(R.id.result)
         imageView = findViewById(R.id.imageView)
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
 
-        val welcomeTextView = findViewById<TextView>(R.id.welcomeTextView)
-        val username = intent.getStringExtra("USERNAME_EXTRA")
-        val signOutButton = findViewById<Button>(R.id.buttonSignOut)
+        firebaseDB = FirebaseFirestore.getInstance()
+
+        //binding = ActivityMainBinding.inflate(layoutInflater)
+
+        // val welcomeTextView = findViewById<TextView>(R.id.welcomeTextView)
+        //val username = intent.getStringExtra("USERNAME_EXTRA")
 
         // Dash Button
-        val dashButton = findViewById<Button>(R.id.dash)
-        dashButton.setOnClickListener {
-            val intent = Intent(this, ChecklistActivity::class.java)
-            startActivity(intent)
-        }
+//        val dashButton = findViewById<Button>(R.id.dash)
+//        dashButton.setOnClickListener {
+//            val intent = Intent(this, DashActivity::class.java)
+//            startActivity(intent)
+//        }
 
         val currentUser = firebaseAuth.currentUser
         currentUserID = currentUser?.uid ?: ""
 
         //Retrieve user's ID
         val saveButton = findViewById<Button>(R.id.saveImageButton)
-        val retrieveButton = findViewById<Button>(R.id.retrieve)
+        // val retrieveButton = findViewById<Button>(R.id.retrieve)
 
-        if (!username.isNullOrEmpty()) {
-            welcomeTextView.text = "Welcome, $username"
-
-            //Persistent storage
-            val persistName = getSharedPreferences("user", MODE_PRIVATE)
-            val editor = persistName.edit()
-            editor.putString("Username", username)
-            editor.apply()
-        }
+//        if (!username.isNullOrEmpty()) {
+//            welcomeTextView.text = "Welcome, $username"
+//
+//            //Persistent storage
+//            val persistName = getSharedPreferences("user", MODE_PRIVATE)
+//            val editor = persistName.edit()
+//            editor.putString("Username", username)
+//            editor.apply()
+//        }
 
         //Retrieve stored name!
         val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
         val savedUsername = sharedPreferences.getString("Username", "")
 
 
-
-        if (!savedUsername.isNullOrEmpty()) {
-            welcomeTextView.text = "Welcome, $savedUsername"
-        }
-
+//        if (!savedUsername.isNullOrEmpty()) {
+//            welcomeTextView.text = "Welcome, $savedUsername"
+//        }
 
 
         camera.setOnClickListener {
@@ -127,13 +142,23 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        signOutButton.setOnClickListener {
-            // Sign out the current user and redirect to the login page
-            firebaseAuth.signOut()
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish() // Close MainActivity
-        }
+//
+//        saveButton.setOnClickListener {
+//            // Check if an image is displayed in the ImageView
+//            if (imageView.drawable != null) {
+//                // Get the drawable bitmap from ImageView
+//                val drawableBitmap = (imageView.drawable).toBitmap()
+//
+//                // Store the bitmap image and the classification text
+////                storeImageAndClassification(drawableBitmap, result.text.toString())
+//
+//                preventFirebaseDuplicates(drawableBitmap, result.text.toString())
+//            } else {
+//                // Handle the case when no image is displayed
+//                Log.e("MainActivity", "No image to save.")
+//            }
+//        }
+
 
         saveButton.setOnClickListener {
             // Check if an image is displayed in the ImageView
@@ -141,68 +166,39 @@ class MainActivity : AppCompatActivity() {
                 // Get the drawable bitmap from ImageView
                 val drawableBitmap = (imageView.drawable).toBitmap()
 
-                // Store the bitmap image and the classification text
-//                storeImageAndClassification(drawableBitmap, result.text.toString())
-
-                preventFirebaseDuplicates(drawableBitmap, result.text.toString())
+                // Display popup with dropdown options
+                showTagSelectionPopup(drawableBitmap)
             } else {
                 // Handle the case when no image is displayed
                 Log.e("MainActivity", "No image to save.")
             }
         }
 
-        retrieveButton.setOnClickListener {
-            retrieveImageAndClassification()
+        back.setOnClickListener {
+            val intent = Intent(this, DashActivity::class.java)
+            startActivity(intent)
         }
-
-
-        //TODO: Prevent duplicate image + text from being saved
-
     }
 
-    private fun retrieveImageAndClassification() {
-        val storageRef = firebaseStorage.reference
-        val imagesRef = storageRef.child("images/$currentUserID")  // retrieve based on user Id --> helps create independent views!
-        val textRef = storageRef.child("classification/$currentUserID")
 
-        CoroutineScope(Dispatchers.Main).launch {
-            try {
-                val imageListResult = imagesRef.listAll().await()
-                val textListResult = textRef.listAll().await()
+    private fun showTagSelectionPopup(bitmap: Bitmap) {
+        val tags = arrayOf("kitchen", "office", "workspace") // Dropdown options
 
-                for (i in imageListResult.items.indices) {
-                    val imageUrl = imageListResult.items[i].downloadUrl.await()
-                    Log.d("MainActivity", "Retrieved image URL: $imageUrl")
-
-                    // Load image
-                    Picasso.get().load(imageUrl)
-                        .error(android.R.drawable.ic_dialog_alert)
-                        .into(imageView)
-
-                    delay(2000) // 2-second delay
-
-                    val textUrl = textListResult.items.getOrElse(i) {
-                        textRef.child("default")
-                            .also { Log.e("MainActivity", "No corresponding text found for image") }
-                    }.downloadUrl.await()
-                    Log.d("MainActivity", "Retrieved text URL: $textUrl")
-
-                    // Load text
-                    val bytes =
-                        textRef.child(textListResult.items[i].name).getBytes(Long.MAX_VALUE).await()
-                    val classificationText = String(bytes, Charsets.UTF_8)
-                    result.text = classificationText
-
-                    delay(2000)
-                }
-                Toast.makeText(this@MainActivity, "Finished retrieving images", Toast.LENGTH_SHORT).show()
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Failed to retrieve image or text URLs: ${e.message}")
-            }
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Select Tag")
+        builder.setItems(tags) { dialog, which ->
+            val selectedTag = tags[which]
+            Toast.makeText(this, selectedTag, Toast.LENGTH_SHORT).show()
+            // Store the bitmap image and the classification text with the selected tag
+            //storeImageWithSpecificTag(bitmap, result.text.toString(), selectedTag)
+            preventFirebaseDuplicates(bitmap, result.text.toString(), selectedTag)
+            // Pass the selected tag to the Dashboard
+            // sendToDashboard(selectedTag)
         }
-
-        Toast.makeText(this, "Retrieving images.", Toast.LENGTH_SHORT).show()
+        val dialog = builder.create()
+        dialog.show()
     }
+
 
     private fun loadExistingImageUUIDs() {
         val storageRef = firebaseStorage.reference
@@ -261,7 +257,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun preventFirebaseDuplicates(bitmap: Bitmap, classificationText: String) {
+    private fun preventFirebaseDuplicates(bitmap: Bitmap, classificationText: String, selectedTag: String) {
         loadExistingImageUUIDs()
         loadExistingImageHashes()
 
@@ -274,23 +270,24 @@ class MainActivity : AppCompatActivity() {
 
         if (!savedImageHashes.contains(imageHash)) {
             // If the hash doesn't exist, store the image and update the hash set
-            storeImageAndClassification(bitmap, classificationText)
+            storeImageAndClassification(bitmap, classificationText, selectedTag)
             savedImageHashes.add(imageHash)
-            Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
+            //Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
         } else {
             Log.d("MainActivity", "Image already exists.")
             Toast.makeText(this, "Image already exists!", Toast.LENGTH_SHORT).show()
         }
     }
 
+
+
     // Add an additional parameter imageUUID for the image UUID
-    private fun storeImageAndClassification(bitmap: Bitmap, classificationText: String) {
+    private fun storeImageAndClassification(bitmap: Bitmap, classificationText: String, selectedTag:String) {
+      //  binding.progressBar.visibility = View.VISIBLE
         val storageRef = firebaseStorage.reference
         val pairUUID = UUID.randomUUID().toString() // Generate a single UUID for image-text pair
-        val imagesRef =
-            storageRef.child("images/$currentUserID/$pairUUID.jpg") // creates separate folders for each user!!!
-        val textRef =
-            storageRef.child("classification/$currentUserID/$pairUUID.txt")
+        val imagesRef = storageRef.child("images/$currentUserID/$pairUUID.jpg") // Store image in Firebase Storage
+        val textRef = storageRef.child("classification/$currentUserID/$pairUUID.txt") // Store text in Firebase Storage
 
         // Convert the bitmap to bytes
         val baos = ByteArrayOutputStream()
@@ -312,27 +309,75 @@ class MainActivity : AppCompatActivity() {
                             "MainActivity",
                             "Classification text uploaded to Firebase Storage. Text URL: $textUrl"
                         )
-                        // Handle success
+
+                        // Create a Firestore document reference
+                        val docRef = firebaseDB.collection("images")
+                            .document() // Use auto-generated ID for the document
+
+                        val timestamp = System.currentTimeMillis()
+                        val date = Date(timestamp)
+                        val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                        val formattedDate = formatter.format(date)
+
+                        // Create a data object to be stored in Firestore
+                        val data = hashMapOf(
+                            "imageUrl" to imageUrl.toString(), // Replace imageUrl with the actual URL obtained
+                            "textUrl" to textUrl.toString(), // Replace textUrl with the actual URL obtained
+                            "classification" to classificationText,
+                            "userId" to currentUserID,
+                            "timestamp" to formattedDate,
+                            "tag" to selectedTag
+                        )
+
+                        // Save the data into Firestore
+                        docRef.set(data)
+                            .addOnSuccessListener {
+                                Toast.makeText(this, "Uploaded to Dashboard!", Toast.LENGTH_SHORT).show()
+                                Log.d("MainActivity", "Image data saved successfully to Firestore")
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                Log.e("MainActivity", "Error saving image data: ${e.message}")
+                            }
+                        //binding.progressBar.visibility = View.GONE
+                        //binding.imageView.setImageResource(R.drawable.vector)
                     }.addOnFailureListener { textUrlFailure ->
+                        Toast.makeText(
+                            this,
+                            "Error getting text URL: ${textUrlFailure.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                         Log.e("MainActivity", "Failed to get text URL: ${textUrlFailure.message}")
-                        // Handle failure
                     }
                 }.addOnFailureListener { textUploadFailure ->
+                    Toast.makeText(
+                        this,
+                        "Error uploading classification text: ${textUploadFailure.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                     Log.e(
                         "MainActivity",
                         "Error uploading classification text: ${textUploadFailure.message}"
                     )
-                    // Handle failure
                 }
             }.addOnFailureListener { imageUrlFailure ->
+                Toast.makeText(
+                    this,
+                    "Error getting image URL: ${imageUrlFailure.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
                 Log.e("MainActivity", "Failed to get image URL: ${imageUrlFailure.message}")
-                // Handle failure
             }
         }.addOnFailureListener { imageUploadFailure ->
+            Toast.makeText(
+                this,
+                "Error uploading image: ${imageUploadFailure.message}",
+                Toast.LENGTH_SHORT
+            ).show()
             Log.e("MainActivity", "Error uploading image: ${imageUploadFailure.message}")
-            // Handle failure
         }
     }
+
 
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -426,7 +471,7 @@ class MainActivity : AppCompatActivity() {
 
             // Format and display the result
             val resultText =
-                "$predictedClassLabel\n $messyScore%"    // Predicted Premium: $predictedPremiumLabel"
+                "$predictedClassLabel"   // Predicted Premium: $predictedPremiumLabel"
             result.text = Html.fromHtml(resultText, Html.FROM_HTML_MODE_COMPACT)
             result.gravity = Gravity.CENTER
             // storeClassificationText(resultText)
