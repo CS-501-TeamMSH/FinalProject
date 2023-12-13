@@ -5,15 +5,26 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+    android:layout_margin="8dp">
+
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"/>
+        android:layout_height="match_parent"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:outlineProvider="background"
+        android:clipToOutline="true"/>
 
-    <TextView
+</androidx.cardview.widget.CardView>
+
+        <TextView
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"/>
-</LinearLayout>
+        android:padding="8dp"
+        android:textAlignment="center"/>
+    </LinearLayout>

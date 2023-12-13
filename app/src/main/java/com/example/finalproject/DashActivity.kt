@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.finalproject.ml.ModelUnquant
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
@@ -62,6 +63,7 @@ class DashActivity : AppCompatActivity() {
 
     private lateinit var camera: Button
     private lateinit var gallery: Button
+    private lateinit var fabButton: FloatingActionButton
     private lateinit var imageView: ImageView
     private lateinit var result: TextView
     private lateinit var save: Button
@@ -106,6 +108,7 @@ class DashActivity : AppCompatActivity() {
         fetchImageUrlsFromFirestore()
 
         buttonAdd = findViewById<ImageButton>(R.id.addImage)
+        fabButton = findViewById(R.id.fabAdd)
 
         signOut = findViewById<TextView>(R.id.signOutButton)
 
@@ -117,6 +120,11 @@ class DashActivity : AppCompatActivity() {
         buttonAdd.setOnClickListener {
             showPictureDialog()
         }
+
+        fabButton.setOnClickListener {
+            showPictureDialog()
+        }
+
         calendar.setOnClickListener {
             // Get the current date
             val currentDate = Calendar.getInstance()
@@ -465,7 +473,16 @@ class DashActivity : AppCompatActivity() {
                         noImageText.visibility = View.VISIBLE
                         recyclerView.visibility = View.GONE
                     } else {
-                        adapter = ImageAdapter(items)
+
+                        val adapter = ImageAdapter(items) { selectedItem ->
+                            // Handle the click here, for example, navigate to a new activity
+                            val intent = Intent(this, FeedbackActivity::class.java)
+                            intent.putExtra("imgUrl", selectedItem.imageUrl)
+                            intent.putExtra("classification", selectedItem.text)
+                            startActivity(intent)
+                        }
+
+                        // adapter = ImageAdapter(items)
 
                         // Show RecyclerView and set the adapter when images are present
                         recyclerView.visibility = View.VISIBLE

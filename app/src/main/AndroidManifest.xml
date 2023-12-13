@@ -43,6 +43,10 @@
             android:name=".DashActivity"
             android:exported="true"
             android:screenOrientation="portrait"></activity>
+        <activity
+            android:name=".FeedbackActivity"
+            android:exported="true"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>
