@@ -88,26 +88,11 @@
             app:layout_constraintStart_toStartOf="parent"
             android:textAlignment="center"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/noImageAddButton"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="8dp"
-            android:elevation="1dp"
-            android:stateListAnimator="@null"
-            android:fontFamily="@font/ubuntu_bold"
-            android:textSize="25sp"
-            app:cornerRadius="9dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/noImageText"
-            android:visibility="invisible"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:layout_margin="25dp"
             app:layout_constraintTop_toBottomOf="@id/date"
             app:layout_constraintStart_toStartOf="parent"

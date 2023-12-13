@@ -94,7 +94,7 @@ class DashActivity : AppCompatActivity() {
         val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
         val formattedDate: String = dateFormat.format(today)
         date.text = formattedDate
-        fetchImageUrlsFromFirestore()
+
 
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
@@ -103,6 +103,7 @@ class DashActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recycler)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
+        fetchImageUrlsFromFirestore()
 
         buttonAdd = findViewById<ImageButton>(R.id.addImage)
 
@@ -154,7 +155,6 @@ class DashActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-
 
 
     }
