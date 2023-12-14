@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.finalproject.ml.ModelUnquant
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -105,6 +106,7 @@ class DashActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recycler)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
+
         fetchImageUrlsFromFirestore()
 
         buttonAdd = findViewById<ImageButton>(R.id.addImage)

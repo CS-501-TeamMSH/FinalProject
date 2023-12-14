@@ -32,7 +32,6 @@ class ChecklistAdapter(private val items: List<String>) :
 
         fun bind(item: String) {
             textView.text = item
-
         }
     }
 }
