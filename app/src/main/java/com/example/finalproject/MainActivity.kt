@@ -270,6 +270,7 @@ class MainActivity : AppCompatActivity() {
                             val intent = Intent(this, FeedbackActivity::class.java)
                             intent.putExtra("imgUrl", selectedItem.imageUrl)
                             intent.putExtra("classification", selectedItem.classification)
+                            intent.putExtra("tag", selectedItem.tag)
                             startActivity(intent)
                         }
 

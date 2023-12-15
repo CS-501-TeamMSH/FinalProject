@@ -22,11 +22,21 @@ class FeedbackActivity : AppCompatActivity() {
         setContentView(R.layout.activity_feedback)
         val imgUrl = intent.getStringExtra("imgUrl")
         val classification = intent.getStringExtra("classification")
+        val tag = intent.getStringExtra("tag")
         var img = findViewById<ImageView>(R.id.feedbackimage)
         var text = findViewById<TextView>(R.id.feedbacktext)
+        val feedbackIcon = findViewById<ImageView>(R.id.feedbackClassificationIcon)
+        val labelText = findViewById<TextView>(R.id.labelText)
 
         Picasso.get().load(imgUrl).into(img)
         text.text = classification
+        labelText.text = tag
+
+        if (classification.equals("Messy")) {
+            feedbackIcon.setImageResource(R.drawable.round_add_circle_24);
+        } else {
+            feedbackIcon.setImageResource(R.drawable.baseline_check_circle_24);
+        }
 
         recyclerView = findViewById<RecyclerView>(R.id.todoRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -35,6 +45,10 @@ class FeedbackActivity : AppCompatActivity() {
 
         val checklistSegmentButton =
             findViewById<MaterialButtonToggleGroup>(R.id.checklistSegmentButton)
+
+        // Default Checklist Office
+        checklistSegmentButton.check(R.id.button1)
+        updateChecklist(getOfficeChecklist())
 
         checklistSegmentButton.addOnButtonCheckedListener { group, checkedId, isChecked ->
             if (isChecked && checkedId == group.checkedButtonId) {
