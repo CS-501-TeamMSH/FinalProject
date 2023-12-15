@@ -7,10 +7,15 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButtonToggleGroup
 import com.squareup.picasso.Picasso
 import org.w3c.dom.Text
 
 class FeedbackActivity : AppCompatActivity()  {
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var checklistAdapter: ChecklistAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_feedback)
@@ -22,20 +27,54 @@ class FeedbackActivity : AppCompatActivity()  {
         Picasso.get().load(imgUrl).into(img)
         text.text = classification
 
-        val recyclerview = findViewById<RecyclerView>(R.id.todoRecyclerView)
-        recyclerview.layoutManager = LinearLayoutManager(this)
+        recyclerView = findViewById<RecyclerView>(R.id.todoRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val kitchenCleanlinessChecklist = listOf(
+        val checklistSegmentButton = findViewById<MaterialButtonToggleGroup>(R.id.checklistSegmentButton)
+
+        checklistSegmentButton.addOnButtonCheckedListener { group, checkedId, isChecked ->
+            if (isChecked && checkedId == group.checkedButtonId) {
+                when (checkedId) {
+                    R.id.button1 -> updateChecklist(getOfficeChecklist())
+                    R.id.button2 -> updateChecklist(getKitchenChecklist())
+                    R.id.button3 -> updateChecklist(getOtherChecklist())
+                }
+            }
+        }
+
+    }
+
+    private fun updateChecklist(checklist: List<String>) {
+        recyclerView.adapter = ChecklistAdapter(checklist)
+    }
+
+    private fun getOfficeChecklist(): List<String> {
+        return listOf(
+            "Wipe surfaces regularly",
+            "Organize storage spaces",
+            "Dispose of trash regularly",
+            "Sweep and mop the floors",
+            "Check and refill office supplies"
+        )
+    }
+
+    private fun getKitchenChecklist(): List<String> {
+        return listOf(
             "Wash dishes promptly",
             "Wipe surfaces regularly",
             "Organize storage spaces",
             "Dispose of trash regularly",
             "Sweep and mop the floors"
         )
+    }
 
-        recyclerview.adapter = ChecklistAdapter(kitchenCleanlinessChecklist)
-
-
-
+    private fun getOtherChecklist(): List<String> {
+        return listOf(
+            "Wipe surfaces regularly",
+            "Organize storage spaces",
+            "Dispose of trash regularly",
+            "Sweep and mop the floors",
+            "Remove any trip hazards"
+        )
     }
 }

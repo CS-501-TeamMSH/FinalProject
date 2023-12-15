@@ -26,12 +26,15 @@ class ChecklistAdapter(private val items: List<String>) :
 
 
 
+
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val checkbox: CheckBox = itemView.findViewById(R.id.todoCheckbox)
         private val textView: TextView = itemView.findViewById(R.id.todoText)
 
         fun bind(item: String) {
             textView.text = item
+            checkbox.isChecked = false
         }
     }
 }
