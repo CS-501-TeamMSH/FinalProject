@@ -1,7 +1,9 @@
 package com.example.finalproject
 
 import ChecklistAdapter
+import android.content.Intent
 import android.os.Bundle
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -13,6 +15,7 @@ import com.squareup.picasso.Picasso
 class FeedbackActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
+    private lateinit var backButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +31,8 @@ class FeedbackActivity : AppCompatActivity() {
         recyclerView = findViewById<RecyclerView>(R.id.todoRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
+        backButton = findViewById<Button>(R.id.backButton)
+
         val checklistSegmentButton =
             findViewById<MaterialButtonToggleGroup>(R.id.checklistSegmentButton)
 
@@ -39,6 +44,12 @@ class FeedbackActivity : AppCompatActivity() {
                     R.id.button3 -> updateChecklist(getOtherChecklist())
                 }
             }
+        }
+
+
+        backButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
 
     }
