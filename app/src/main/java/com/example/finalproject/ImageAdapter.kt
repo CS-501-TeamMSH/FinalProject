@@ -55,7 +55,5 @@ class ImageAdapter(private val items: List<Item>, private val onItemClick: (Item
         val imageView: ImageView = itemView.findViewById(R.id.imageView)
         val icon: ImageView = itemView.findViewById(R.id.classificationIcon)
         val classText: TextView = itemView.findViewById(R.id.textViewClassification)
-
-
     }
 }

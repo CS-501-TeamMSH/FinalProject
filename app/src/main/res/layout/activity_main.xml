@@ -14,10 +14,11 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="25sp"
-            android:textSize="16sp"
+            android:minHeight="48dp"
+            android:onClick="signOut"
             android:text="Sign Out"
             android:textColor="#0000FF"
-            android:onClick="signOut"
+            android:textSize="16sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -52,31 +53,15 @@
             android:id="@+id/calendarButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="18dp"
             android:layout_marginTop="8sp"
             android:layout_marginEnd="12sp"
-            android:src="@drawable/baseline_calendar_month_24"
             android:background="?android:selectableItemBackground"
             android:contentDescription="Calendar"
+            android:src="@drawable/baseline_calendar_month_24"
             android:textSize="12sp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/date"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-
-
-        <ImageButton
-            android:id="@+id/addImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20sp"
-            android:layout_marginEnd="12sp"
-            android:src="@drawable/baseline_add_24"
-            android:background="?android:selectableItemBackground"
-            android:contentDescription="Add"
-            android:scaleType="centerInside"
-            android:onClick="onPlusButtonClick"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            tools:ignore="TouchTargetSizeCheck" />
 
         <TextView
             android:id="@+id/noImageText"
@@ -95,11 +80,12 @@
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
             android:src="@drawable/baseline_add_24"
-            app:tint="@android:color/white"
             app:backgroundTint="@color/md_theme_primary"
-            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.FloatingActionButton"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.FloatingActionButton"
+            app:tint="@android:color/white"
+            tools:ignore="SpeakableTextPresentCheck" />
 
 
         <androidx.recyclerview.widget.RecyclerView
