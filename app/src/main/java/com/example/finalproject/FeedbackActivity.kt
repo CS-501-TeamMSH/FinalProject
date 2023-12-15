@@ -46,9 +46,22 @@ class FeedbackActivity : AppCompatActivity() {
         val checklistSegmentButton =
             findViewById<MaterialButtonToggleGroup>(R.id.checklistSegmentButton)
 
-        // Default Checklist Office
-        checklistSegmentButton.check(R.id.button1)
-        updateChecklist(getOfficeChecklist())
+        // Default Checklist depending on tag
+        when (tag) {
+            "Office" -> {
+                checklistSegmentButton.check(R.id.button1)
+                updateChecklist(getOfficeChecklist())
+            }
+
+            "Kitchen" -> {
+                checklistSegmentButton.check(R.id.button2)
+                updateChecklist(getKitchenChecklist())
+            }
+            else -> {
+                checklistSegmentButton.check(R.id.button3)
+                updateChecklist(getOtherChecklist())
+            }
+        }
 
         checklistSegmentButton.addOnButtonCheckedListener { group, checkedId, isChecked ->
             if (isChecked && checkedId == group.checkedButtonId) {
