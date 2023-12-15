@@ -31,4 +31,9 @@
                 <item name="colorPrimaryInverse">@color/md_theme_inversePrimary</item>
             </style>
 
+        <style name="ShapeAppearanceOverlay.FloatingActionButton" parent="">
+                <item name="cornerFamily">rounded</item>
+                <item name="cornerSize">50%</item>
+        </style>
+
 </resources>
