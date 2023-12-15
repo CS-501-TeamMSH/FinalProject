@@ -9,12 +9,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.squareup.picasso.Picasso
-import org.w3c.dom.Text
 
-class FeedbackActivity : AppCompatActivity()  {
+class FeedbackActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var checklistAdapter: ChecklistAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,7 +28,8 @@ class FeedbackActivity : AppCompatActivity()  {
         recyclerView = findViewById<RecyclerView>(R.id.todoRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val checklistSegmentButton = findViewById<MaterialButtonToggleGroup>(R.id.checklistSegmentButton)
+        val checklistSegmentButton =
+            findViewById<MaterialButtonToggleGroup>(R.id.checklistSegmentButton)
 
         checklistSegmentButton.addOnButtonCheckedListener { group, checkedId, isChecked ->
             if (isChecked && checkedId == group.checkedButtonId) {

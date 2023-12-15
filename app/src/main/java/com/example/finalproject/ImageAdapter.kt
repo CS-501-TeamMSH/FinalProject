@@ -1,25 +1,21 @@
 package com.example.finalproject
 
-import android.graphics.Outline
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewOutlineProvider
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.RequiresApi
-import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.squareup.picasso.Picasso
 
 
-
-class ImageAdapter(private val items: List<Item>, private val onItemClick: (Item) -> Unit) : RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
+class ImageAdapter(private val items: List<Item>, private val onItemClick: (Item) -> Unit) :
+    RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.image_text_fragment, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.image_text_fragment, parent, false)
         return ViewHolder(view)
     }
 
@@ -32,11 +28,15 @@ class ImageAdapter(private val items: List<Item>, private val onItemClick: (Item
         holder.classText.text = item.classification
 
         if (item.classification == "Messy") {
-            val drawable = ContextCompat.getDrawable(holder.itemView.context, R.drawable.round_add_circle_24)
+            val drawable =
+                ContextCompat.getDrawable(holder.itemView.context, R.drawable.round_add_circle_24)
             holder.icon.setImageDrawable(drawable)
 
         } else {
-            val drawable = ContextCompat.getDrawable(holder.itemView.context, R.drawable.baseline_check_circle_24)
+            val drawable = ContextCompat.getDrawable(
+                holder.itemView.context,
+                R.drawable.baseline_check_circle_24
+            )
             holder.icon.setImageDrawable(drawable)
         }
 

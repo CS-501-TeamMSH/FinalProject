@@ -9,7 +9,6 @@ import android.widget.Toast
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
@@ -28,7 +27,8 @@ class LoginActivity : AppCompatActivity() {
         val editTextUsername = findViewById<EditText>(R.id.editTextUsername)
         val editTextPassword = findViewById<EditText>(R.id.editTextPassword)
         val buttonLogin = findViewById<Button>(R.id.loginButton)
-        val buttonRegister = findViewById<Button>(R.id.registerButton) // Add the Register button in your layout XML
+        val buttonRegister =
+            findViewById<Button>(R.id.registerButton) // Add the Register button in your layout XML
         val buttonGoogle = findViewById<MaterialButton>(R.id.googleButton)
         auth = FirebaseAuth.getInstance()
 
@@ -57,14 +57,12 @@ class LoginActivity : AppCompatActivity() {
                 .addOnCompleteListener(this) { task ->
                     if (task.isSuccessful) {
                         // Sign in success, update UI with the signed-in user's information
-                        val user = auth.currentUser
                         Toast.makeText(
                             this, "Authentication successful.",
                             Toast.LENGTH_SHORT
                         ).show()
-                        val intent = Intent(this, DashActivity::class.java)
-                        //intent.putExtra("USERNAME_EXTRA", enteredUsername) // Set extra here
-                        startActivity(intent) // Start the MainActivity
+                        val intent = Intent(this, MainActivity::class.java)
+                        startActivity(intent) // Start the ImageDetailActivity
                         finish() // Finish the LoginActivity
                     } else {
                         // If sign in fails, display a message to the user.
@@ -88,7 +86,8 @@ class LoginActivity : AppCompatActivity() {
                         if (signInMethods.isNotEmpty()) {
                             // User already exists with the entered email, show error message
                             Toast.makeText(
-                                this, "User with this email already exists. Please use a different email.",
+                                this,
+                                "User with this email already exists. Please use a different email.",
                                 Toast.LENGTH_SHORT
                             ).show()
                         } else {
@@ -108,16 +107,26 @@ class LoginActivity : AppCompatActivity() {
                                                         ).show()
 
                                                         // Log the user in after registration
-                                                        auth.signInWithEmailAndPassword(enteredUsername, enteredPassword)
+                                                        auth.signInWithEmailAndPassword(
+                                                            enteredUsername,
+                                                            enteredPassword
+                                                        )
                                                             .addOnCompleteListener { signInTask ->
                                                                 if (signInTask.isSuccessful) {
-                                                                    val intent = Intent(this, DashActivity::class.java)
-                                                                    intent.putExtra("USERNAME_EXTRA", enteredUsername)
+                                                                    val intent = Intent(
+                                                                        this,
+                                                                        MainActivity::class.java
+                                                                    )
+                                                                    intent.putExtra(
+                                                                        "USERNAME_EXTRA",
+                                                                        enteredUsername
+                                                                    )
                                                                     startActivity(intent)
                                                                     finish()
                                                                 } else {
                                                                     Toast.makeText(
-                                                                        this, "Sign-in after registration failed.",
+                                                                        this,
+                                                                        "Sign-in after registration failed.",
                                                                         Toast.LENGTH_SHORT
                                                                     ).show()
                                                                 }
@@ -154,17 +163,6 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
         }
-
-
-
-
-//        buttonGoogle.setOnClickListener {
-//            Toast.makeText(this, "TODO", Toast.LENGTH_SHORT).show()
-//        }
-//
-
-
-
     }
 
     override fun onStart() {
@@ -183,6 +181,7 @@ class LoginActivity : AppCompatActivity() {
             finish()
         } else {
             // Handle UI update if the user is not signed in
+            Toast.makeText(this, "Please sign in", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -202,32 +201,33 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-        private fun firebaseAuthWithGoogle(idToken: String) {
-            val credential = GoogleAuthProvider.getCredential(idToken, null)
-            auth.signInWithCredential(credential)
-                .addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful) {
-                        val user = auth.currentUser
-                        val username = user?.displayName ?: ""
-                        Toast.makeText(this, "Google Login Successful", Toast.LENGTH_SHORT).show()
+    private fun firebaseAuthWithGoogle(idToken: String) {
+        val credential = GoogleAuthProvider.getCredential(idToken, null)
+        auth.signInWithCredential(credential)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val user = auth.currentUser
+                    val username = user?.displayName ?: ""
+                    Toast.makeText(this, "Google Login Successful", Toast.LENGTH_SHORT).show()
 
 
-                        val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
-                        val editor = sharedPreferences.edit()
-                        editor.putString("Username", username)
-                        editor.apply()
+                    val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
+                    val editor = sharedPreferences.edit()
+                    editor.putString("Username", username)
+                    editor.apply()
 
 
-                        val intent = Intent(this, DashActivity::class.java)
-                        intent.putExtra("USERNAME_EXTRA", username)
-                        startActivity(intent)
-                        finish()
-                    } else {
-                        // Firebase authentication failed
-                        Toast.makeText(this, "Firebase Authentication Failed", Toast.LENGTH_SHORT).show()
-                        updateUI(null)
-                    }
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.putExtra("USERNAME_EXTRA", username)
+                    startActivity(intent)
+                    finish()
+                } else {
+                    // Firebase authentication failed
+                    Toast.makeText(this, "Firebase Authentication Failed", Toast.LENGTH_SHORT)
+                        .show()
+                    updateUI(null)
                 }
-        }
+            }
     }
+}
 
