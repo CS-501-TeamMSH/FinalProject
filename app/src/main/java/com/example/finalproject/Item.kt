@@ -1,3 +1,3 @@
 package com.example.finalproject
 
-data class Item(val text: String, val imageUrl: String)
+data class Item(val tag: String, val classification: String, val imageUrl: String)

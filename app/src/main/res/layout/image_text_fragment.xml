@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_margin="8dp">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/dashCard"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-    android:layout_margin="8dp">
+    android:layout_margin="8dp"
+        app:cardCornerRadius="8dp">
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="fitCenter"
+        android:scaleType="centerCrop"
         android:adjustViewBounds="true"
         android:outlineProvider="background"
         android:clipToOutline="true"/>
@@ -25,6 +29,32 @@
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="8dp"
+        android:textSize="20sp"
+        android:paddingBottom="6dp"
+        android:textStyle="bold"
         android:textAlignment="center"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <ImageView
+            android:id="@+id/classificationIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+           />
+
+        <TextView
+            android:id="@+id/textViewClassification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:gravity="center"
+            />
     </LinearLayout>
+
+
+</LinearLayout>

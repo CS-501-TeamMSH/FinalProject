@@ -459,13 +459,20 @@ class DashActivity : AppCompatActivity() {
                 .addOnSuccessListener { result ->
                     for (document in result) {
                         val imageUrl = document.getString("imageUrl")
-                        val text = document.getString("classification") + " " +
-                                document.getString("tag")
-                        //val tag = document.getString("tag")
+                        val classification = document.getString("classification")
+                            ?.let { capitalize(it) }
+                        val tag = document.getString("tag")?.let { capitalize(it) }
+
+
                         imageUrl?.let {
                             noImageText.visibility = View.GONE
-                            text?.let { it1 -> Item(it1, it) }?.let { it2 -> items.add(it2) }
-                            // tag?.let{it1 -> Item(it1, it) }?.let { it2 -> items.add(it2) }
+                            tag?.let { it1 ->
+                                classification?.let { it2 ->
+                                    Item(it1, it2, it)
+                                }?.let { it3 ->
+                                    items.add(it3)
+                                }
+                            }
                         }
                     }
 
@@ -480,7 +487,7 @@ class DashActivity : AppCompatActivity() {
                             // Handle the click here, for example, navigate to a new activity
                             val intent = Intent(this, FeedbackActivity::class.java)
                             intent.putExtra("imgUrl", selectedItem.imageUrl)
-                            intent.putExtra("classification", selectedItem.text)
+                            intent.putExtra("classification", selectedItem.classification)
                             startActivity(intent)
                         }
 
@@ -495,5 +502,9 @@ class DashActivity : AppCompatActivity() {
                     exception.printStackTrace()
                 }
         }
+    }
+
+    fun capitalize(str: String): String {
+        return str.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     }
 }
