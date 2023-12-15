@@ -90,7 +90,6 @@ class MainActivity : AppCompatActivity() {
 
         fetchImageUrlsFromFirestore()
 
-        buttonAdd = findViewById<ImageButton>(R.id.addImage)
         fabButton = findViewById(R.id.fabAdd)
 
         signOut = findViewById<TextView>(R.id.signOutButton)
@@ -100,9 +99,6 @@ class MainActivity : AppCompatActivity() {
         // Fetch image URLs from Firebase Firestore
         fetchImageUrlsFromFirestore()
 
-        buttonAdd.setOnClickListener {
-            showPictureDialog()
-        }
 
         fabButton.setOnClickListener {
             showPictureDialog()
