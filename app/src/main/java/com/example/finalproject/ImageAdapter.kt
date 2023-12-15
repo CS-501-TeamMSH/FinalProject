@@ -31,7 +31,7 @@ class ImageAdapter(private val items: List<Item>, private val onItemClick: (Item
 
         holder.classText.text = item.classification
 
-        if (item.classification == "messy") {
+        if (item.classification == "Messy") {
             val drawable = ContextCompat.getDrawable(holder.itemView.context, R.drawable.round_add_circle_24)
             holder.icon.setImageDrawable(drawable)
 
