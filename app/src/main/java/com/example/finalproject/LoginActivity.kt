@@ -9,7 +9,6 @@ import android.widget.Toast
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
 import com.google.android.material.button.MaterialButton
 import com.google.firebase.auth.FirebaseAuth
@@ -62,9 +61,9 @@ class LoginActivity : AppCompatActivity() {
                             this, "Authentication successful.",
                             Toast.LENGTH_SHORT
                         ).show()
-                        val intent = Intent(this, DashActivity::class.java)
+                        val intent = Intent(this, MainActivity::class.java)
                         //intent.putExtra("USERNAME_EXTRA", enteredUsername) // Set extra here
-                        startActivity(intent) // Start the MainActivity
+                        startActivity(intent) // Start the ImageDetailActivity
                         finish() // Finish the LoginActivity
                     } else {
                         // If sign in fails, display a message to the user.
@@ -111,7 +110,7 @@ class LoginActivity : AppCompatActivity() {
                                                         auth.signInWithEmailAndPassword(enteredUsername, enteredPassword)
                                                             .addOnCompleteListener { signInTask ->
                                                                 if (signInTask.isSuccessful) {
-                                                                    val intent = Intent(this, DashActivity::class.java)
+                                                                    val intent = Intent(this, MainActivity::class.java)
                                                                     intent.putExtra("USERNAME_EXTRA", enteredUsername)
                                                                     startActivity(intent)
                                                                     finish()
@@ -178,7 +177,7 @@ class LoginActivity : AppCompatActivity() {
         // You can update the UI based on the currentUser object
         // For example, enable/disable certain buttons, show user information, etc.
         if (currentUser != null) {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, ImageDetailActivity::class.java)
             startActivity(intent)
             finish()
         } else {
@@ -218,7 +217,7 @@ class LoginActivity : AppCompatActivity() {
                         editor.apply()
 
 
-                        val intent = Intent(this, DashActivity::class.java)
+                        val intent = Intent(this, MainActivity::class.java)
                         intent.putExtra("USERNAME_EXTRA", username)
                         startActivity(intent)
                         finish()

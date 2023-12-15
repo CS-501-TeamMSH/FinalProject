@@ -1,61 +1,70 @@
 package com.example.finalproject
 
 import android.Manifest
+import android.app.Activity
+import android.app.DatePickerDialog
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.media.Image
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Html
 import android.util.Log
-
+import android.view.Gravity
+import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.finalproject.ml.ModelUnquant
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
-import android.text.Html
-import android.view.Gravity
-import android.widget.ImageButton
-import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
-import androidx.core.app.ActivityCompat
-import androidx.core.graphics.drawable.toBitmap
-import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
-import com.squareup.picasso.Picasso
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
-import java.io.ByteArrayOutputStream
-import java.math.BigInteger
-import java.security.MessageDigest
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-
 class MainActivity : AppCompatActivity() {
+    private val firestoreDB = FirebaseFirestore.getInstance()
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var buttonAdd: ImageButton
+    private val CAMERA_PERMISSION_CODE = 100
+    private val CAMERA_REQUEST_CODE = 101
+    private val GALLERY_REQUEST_CODE = 102
+    private var imageUri: Uri? = null
 
-    private lateinit var camera: ImageView
-    private lateinit var gallery: ImageView
+    private lateinit var calendar: ImageButton
+
+    private lateinit var signOut: TextView
+
+    private lateinit var camera: Button
+    private lateinit var gallery: Button
+    private lateinit var fabButton: FloatingActionButton
     private lateinit var imageView: ImageView
     private lateinit var result: TextView
     private lateinit var save: Button
-    private lateinit var back: Button
-    ///private lateinit var retrieveButton: Button
+    private lateinit var retrieveButton: Button
     private val imageSize = 224
+
+    private lateinit var title: TextView
 
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firebaseStorage: FirebaseStorage
@@ -66,336 +75,163 @@ class MainActivity : AppCompatActivity() {
     private val savedImageAndTextSet = HashSet<String>()
     private val savedImageHashes = HashSet<String>()
 
+    private val calendarIcon = Calendar.getInstance()
+
     private val storedImages = mutableListOf<String>()
+    private lateinit var date: TextView
     private lateinit var currentUserID: String
-
-    // private lateinit var binding: ActivityMainBinding
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        camera = findViewById<ImageView>(R.id.button)
-        gallery = findViewById<ImageView>(R.id.button2)
-        back = findViewById<Button>(R.id.backButton)
+        date = findViewById<TextView>(R.id.date)
 
-        result = findViewById(R.id.result)
-        imageView = findViewById(R.id.imageView)
+        val today = Date()
+        val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+        val formattedDate: String = dateFormat.format(today)
+        date.text = formattedDate
+
+
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseStorage = FirebaseStorage.getInstance()
 
         firebaseDB = FirebaseFirestore.getInstance()
 
-        //binding = ActivityMainBinding.inflate(layoutInflater)
+        recyclerView = findViewById(R.id.recycler)
+        recyclerView.layoutManager = GridLayoutManager(this, 2)
 
-        // val welcomeTextView = findViewById<TextView>(R.id.welcomeTextView)
-        //val username = intent.getStringExtra("USERNAME_EXTRA")
+        fetchImageUrlsFromFirestore()
 
-        // Dash Button
-//        val dashButton = findViewById<Button>(R.id.dash)
-//        dashButton.setOnClickListener {
-//            val intent = Intent(this, DashActivity::class.java)
-//            startActivity(intent)
-//        }
+        buttonAdd = findViewById<ImageButton>(R.id.addImage)
+        fabButton = findViewById(R.id.fabAdd)
 
-        val currentUser = firebaseAuth.currentUser
-        currentUserID = currentUser?.uid ?: ""
+        signOut = findViewById<TextView>(R.id.signOutButton)
 
-        //Retrieve user's ID
-        val saveButton = findViewById<Button>(R.id.saveImageButton)
-        // val retrieveButton = findViewById<Button>(R.id.retrieve)
+        calendar = findViewById<ImageButton>(R.id.calendarButton)
 
-//        if (!username.isNullOrEmpty()) {
-//            welcomeTextView.text = "Welcome, $username"
-//
-//            //Persistent storage
-//            val persistName = getSharedPreferences("user", MODE_PRIVATE)
-//            val editor = persistName.edit()
-//            editor.putString("Username", username)
-//            editor.apply()
-//        }
+        // Fetch image URLs from Firebase Firestore
+        fetchImageUrlsFromFirestore()
 
-        //Retrieve stored name!
-        val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
-        val savedUsername = sharedPreferences.getString("Username", "")
-
-
-//        if (!savedUsername.isNullOrEmpty()) {
-//            welcomeTextView.text = "Welcome, $savedUsername"
-//        }
-
-
-        camera.setOnClickListener {
-            if (checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                startActivityForResult(cameraIntent, 3)
-            } else {
-                requestPermissions(arrayOf(Manifest.permission.CAMERA), 100)
-            }
+        buttonAdd.setOnClickListener {
+            showPictureDialog()
         }
 
-
-        gallery.setOnClickListener {
-            val cameraIntent =
-                Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-            startActivityForResult(cameraIntent, 1)
+        fabButton.setOnClickListener {
+            showPictureDialog()
         }
 
+        calendar.setOnClickListener {
+            // Get the current date
+            val currentDate = Calendar.getInstance()
 
-//
-//        saveButton.setOnClickListener {
-//            // Check if an image is displayed in the ImageView
-//            if (imageView.drawable != null) {
-//                // Get the drawable bitmap from ImageView
-//                val drawableBitmap = (imageView.drawable).toBitmap()
-//
-//                // Store the bitmap image and the classification text
-////                storeImageAndClassification(drawableBitmap, result.text.toString())
-//
-//                preventFirebaseDuplicates(drawableBitmap, result.text.toString())
-//            } else {
-//                // Handle the case when no image is displayed
-//                Log.e("MainActivity", "No image to save.")
-//            }
-//        }
-
-
-        saveButton.setOnClickListener {
-            // Check if an image is displayed in the ImageView
-            if (imageView.drawable != null) {
-                // Get the drawable bitmap from ImageView
-                val drawableBitmap = (imageView.drawable).toBitmap()
-
-                // Display popup with dropdown options
-                showTagSelectionPopup(drawableBitmap)
-            } else {
-                // Handle the case when no image is displayed
-                Log.e("MainActivity", "No image to save.")
-            }
-        }
-
-        back.setOnClickListener {
-            val intent = Intent(this, DashActivity::class.java)
-            startActivity(intent)
-        }
-    }
-
-
-    private fun showTagSelectionPopup(bitmap: Bitmap) {
-        val tags = arrayOf("kitchen", "office", "workspace") // Dropdown options
-
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Select Tag")
-        builder.setItems(tags) { dialog, which ->
-            val selectedTag = tags[which]
-            Toast.makeText(this, selectedTag, Toast.LENGTH_SHORT).show()
-            // Store the bitmap image and the classification text with the selected tag
-            //storeImageWithSpecificTag(bitmap, result.text.toString(), selectedTag)
-            preventFirebaseDuplicates(bitmap, result.text.toString(), selectedTag)
-            // Pass the selected tag to the Dashboard
-            // sendToDashboard(selectedTag)
-        }
-        val dialog = builder.create()
-        dialog.show()
-    }
-
-
-    private fun loadExistingImageUUIDs() {
-        val storageRef = firebaseStorage.reference
-        val imagesRef = storageRef.child("images")
-
-        imagesRef.listAll()
-            .addOnSuccessListener { listResult ->
-                for (item in listResult.items) {
-                    // Get the full name of the image (with extension) and extract the UUID part
-                    val fullName = item.name
-                    val parts = fullName.split(".")
-                    if (parts.isNotEmpty()) {
-                        val uuid = parts[0] // Extract UUID part
-                        savedImageAndTextSet.add(uuid)
-                    }
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("MainActivity", "Failed to retrieve image UUIDs: ${e.message}")
-            }
-    }
-
-    private fun loadExistingImageHashes() {
-        val storageRef = firebaseStorage.reference
-        val imagesRef = storageRef.child("images")
-
-        imagesRef.listAll()
-            .addOnSuccessListener { listResult ->
-                for (item in listResult.items) {
-                    // Fetch the image bytes
-                    item.getBytes(Long.MAX_VALUE)
-                        .addOnSuccessListener { bytes ->
-                            // Calculate the hash of the image data
-                            val imageHash = calculateHash(bytes)
-                            savedImageHashes.add(imageHash)
-                        }
-                        .addOnFailureListener { e ->
-                            Log.e("MainActivity", "Failed to fetch image bytes: ${e.message}")
-                        }
-                }
-            }
-            .addOnFailureListener { e ->
-                Log.e("MainActivity", "Failed to retrieve image list: ${e.message}")
-            }
-    }
-
-    private fun calculateHash(imageBytes: ByteArray): String {
-        // Use your preferred hashing algorithm (e.g., MD5 or SHA-256)
-        // Here's an example using MD5 (for simplicity, use a better hashing algorithm in production)
-        val md = MessageDigest.getInstance("MD5")
-        val digest = md.digest(imageBytes)
-
-        // Convert byte array to hexadecimal representation
-        return BigInteger(1, digest).toString(16).padStart(32, '0') // For MD5 hash (32 characters)
-        // For SHA-256, replace "MD5" with "SHA-256" and adjust padding accordingly
-    }
-
-
-    private fun preventFirebaseDuplicates(bitmap: Bitmap, classificationText: String, selectedTag: String) {
-        loadExistingImageUUIDs()
-        loadExistingImageHashes()
-
-        val baos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        val imageData = baos.toByteArray()
-
-        // Calculate hash of the image data
-        val imageHash = calculateHash(imageData)
-
-        if (!savedImageHashes.contains(imageHash)) {
-            // If the hash doesn't exist, store the image and update the hash set
-            storeImageAndClassification(bitmap, classificationText, selectedTag)
-            savedImageHashes.add(imageHash)
-            //Toast.makeText(this, "Image and Text saved successfully!", Toast.LENGTH_SHORT).show()
-        } else {
-            Log.d("MainActivity", "Image already exists.")
-            Toast.makeText(this, "Image already exists!", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-
-
-    // Add an additional parameter imageUUID for the image UUID
-    private fun storeImageAndClassification(bitmap: Bitmap, classificationText: String, selectedTag:String) {
-      //  binding.progressBar.visibility = View.VISIBLE
-        val storageRef = firebaseStorage.reference
-        val pairUUID = UUID.randomUUID().toString() // Generate a single UUID for image-text pair
-        val imagesRef = storageRef.child("images/$currentUserID/$pairUUID.jpg") // Store image in Firebase Storage
-        val textRef = storageRef.child("classification/$currentUserID/$pairUUID.txt") // Store text in Firebase Storage
-
-        // Convert the bitmap to bytes
-        val baos = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
-        val imageData = baos.toByteArray()
-
-        // Store the image in Firebase Storage
-        val uploadImageTask = imagesRef.putBytes(imageData)
-        uploadImageTask.addOnSuccessListener { imageUploadTask ->
-            imagesRef.downloadUrl.addOnSuccessListener { imageUrl ->
-                Log.d("MainActivity", "Image uploaded to Firebase Storage. Image URL: $imageUrl")
-
-                // Store the classification text in Firebase Storage
-                val textBytes = classificationText.toByteArray()
-                val uploadTextTask = textRef.putBytes(textBytes)
-                uploadTextTask.addOnSuccessListener { textUploadTask ->
-                    textRef.downloadUrl.addOnSuccessListener { textUrl ->
-                        Log.d(
-                            "MainActivity",
-                            "Classification text uploaded to Firebase Storage. Text URL: $textUrl"
-                        )
-
-                        // Create a Firestore document reference
-                        val docRef = firebaseDB.collection("images")
-                            .document() // Use auto-generated ID for the document
-
-                        val timestamp = System.currentTimeMillis()
-                        val date = Date(timestamp)
-                        val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-                        val formattedDate = formatter.format(date)
-
-                        // Create a data object to be stored in Firestore
-                        val data = hashMapOf(
-                            "imageUrl" to imageUrl.toString(), // Replace imageUrl with the actual URL obtained
-                            "textUrl" to textUrl.toString(), // Replace textUrl with the actual URL obtained
-                            "classification" to classificationText,
-                            "userId" to currentUserID,
-                            "timestamp" to formattedDate,
-                            "tag" to selectedTag
-                        )
-
-                        // Save the data into Firestore
-                        docRef.set(data)
-                            .addOnSuccessListener {
-                                Toast.makeText(this, "Uploaded to Dashboard!", Toast.LENGTH_SHORT).show()
-                                Log.d("MainActivity", "Image data saved successfully to Firestore")
-                            }
-                            .addOnFailureListener { e ->
-                                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
-                                Log.e("MainActivity", "Error saving image data: ${e.message}")
-                            }
-                        //binding.progressBar.visibility = View.GONE
-                        //binding.imageView.setImageResource(R.drawable.vector)
-                    }.addOnFailureListener { textUrlFailure ->
-                        Toast.makeText(
-                            this,
-                            "Error getting text URL: ${textUrlFailure.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        Log.e("MainActivity", "Failed to get text URL: ${textUrlFailure.message}")
-                    }
-                }.addOnFailureListener { textUploadFailure ->
-                    Toast.makeText(
-                        this,
-                        "Error uploading classification text: ${textUploadFailure.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    Log.e(
-                        "MainActivity",
-                        "Error uploading classification text: ${textUploadFailure.message}"
-                    )
-                }
-            }.addOnFailureListener { imageUrlFailure ->
-                Toast.makeText(
-                    this,
-                    "Error getting image URL: ${imageUrlFailure.message}",
-                    Toast.LENGTH_SHORT
-                ).show()
-                Log.e("MainActivity", "Failed to get image URL: ${imageUrlFailure.message}")
-            }
-        }.addOnFailureListener { imageUploadFailure ->
-            Toast.makeText(
+            val datePickerDialog = DatePickerDialog(
                 this,
-                "Error uploading image: ${imageUploadFailure.message}",
-                Toast.LENGTH_SHORT
-            ).show()
-            Log.e("MainActivity", "Error uploading image: ${imageUploadFailure.message}")
+                { _, year, month, dayOfMonth ->
+                    calendarIcon.set(Calendar.YEAR, year)
+                    calendarIcon.set(Calendar.MONTH, month)
+                    calendarIcon.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+
+                    val selectedDate = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
+                        .format(calendarIcon.time)
+                    Toast.makeText(this, "Selected Date: $selectedDate", Toast.LENGTH_SHORT).show()
+
+                    date.text = selectedDate
+                    fetchImageUrlsFromFirestore()
+                },
+                calendarIcon.get(Calendar.YEAR),
+                calendarIcon.get(Calendar.MONTH),
+                calendarIcon.get(Calendar.DAY_OF_MONTH)
+            )
+
+            // Set the maximum date to the current date to blur out dates after the current date
+            datePickerDialog.datePicker.maxDate = currentDate.timeInMillis
+
+            // Show the DatePickerDialog
+            datePickerDialog.show()
+        }
+
+
+
+        signOut.setOnClickListener {
+            FirebaseAuth.getInstance().signOut()
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
+
+    }
+
+    private fun showPictureDialog() {
+        val pictureDialog = AlertDialog.Builder(this)
+        val pictureDialogItems = arrayOf("Photo Gallery", "Take Picture")
+        pictureDialog.setItems(pictureDialogItems) { dialog, which ->
+            when (which) {
+                0 -> choosePhotoFromGallery()
+                1 -> takePhotoFromCamera()
+            }
+        }
+        // pictureDialog.show()
+        val intent = Intent(this, ImageDetailActivity::class.java)
+        startActivity(intent)
+        finish()
+    }
+
+    // Function to handle capturing an image from the camera
+    private fun takePhotoFromCamera() {
+        // Check camera permission
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.CAMERA),
+                CAMERA_PERMISSION_CODE
+
+            )
+            val intent = Intent(this, ImageDetailActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else {
+            val values = ContentValues()
+            values.put(MediaStore.Images.Media.TITLE, "New Picture")
+            values.put(MediaStore.Images.Media.DESCRIPTION, "From Camera")
+            imageUri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+
         }
     }
 
+    // Function to handle selecting an image from the gallery
+    private fun choosePhotoFromGallery() {
+        val galleryIntent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+        startActivityForResult(galleryIntent, GALLERY_REQUEST_CODE)
+    }
 
-
+    // Override onActivityResult to handle the result of image selection/capture
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
-        if (resultCode == RESULT_OK) {
+        if (resultCode == Activity.RESULT_OK) {
             when (requestCode) {
-                1 -> {
-                    // Gallery
-                    val selectedImage: Uri? = data?.data
-                    displayImage(selectedImage)
+                CAMERA_REQUEST_CODE -> {
+                    // Camera photo is captured
+                    // You can use imageUri to do whatever you want with the image
+                    imageUri?.let { uri ->
+//                        val intent = Intent(this, ImageDetailActivity::class.java)
+//                        startActivity(intent)
+//                        finish()
+                        displayImage(uri)
+                    }
                 }
 
-                3 -> {
-                    // Camera
-                    val photo: Bitmap = data?.extras?.get("data") as Bitmap
-                    val uri = getImageUri(photo)
-                    displayImage(uri)
+                GALLERY_REQUEST_CODE -> {
+                    // Gallery photo is selected
+                    imageUri = data?.data
+                    // You can use imageUri to do whatever you want with the image
+                    imageUri?.let { uri ->
+                        displayImage(uri)
+                    }
                 }
             }
         }
@@ -407,10 +243,12 @@ class MainActivity : AppCompatActivity() {
             val resizedBitmap = resizeBitmap(bitmap, imageSize, imageSize)
             imageView.setImageBitmap(resizedBitmap)
             processImage(resizedBitmap)
+            storeImageAndTextToFirestore(resizedBitmap, result.text.toString())
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
+
 
     private fun resizeBitmap(bitmap: Bitmap, width: Int, height: Int): Bitmap {
         return Bitmap.createScaledBitmap(bitmap, width, height, true)
@@ -471,7 +309,7 @@ class MainActivity : AppCompatActivity() {
 
             // Format and display the result
             val resultText =
-                "$predictedClassLabel"   // Predicted Premium: $predictedPremiumLabel"
+                "$predictedClassLabel\n $messyScore%"    // Predicted Premium: $predictedPremiumLabel"
             result.text = Html.fromHtml(resultText, Html.FROM_HTML_MODE_COMPACT)
             result.gravity = Gravity.CENTER
             // storeClassificationText(resultText)
@@ -506,4 +344,149 @@ class MainActivity : AppCompatActivity() {
         return byteBuffer
     }
 
+
+    private fun storeImageAndTextToFirestore(bitmap: Bitmap, classificationText: String) {
+        val storageRef = firebaseStorage.reference
+        val pairUUID = UUID.randomUUID().toString() // Generate a single UUID for image-text pair
+        val imagesRef =
+            storageRef.child("images/$currentUserID/$pairUUID.jpg") // Store image in Firebase Storage
+        val textRef =
+            storageRef.child("classification/$currentUserID/$pairUUID.txt") // Store text in Firebase Storage
+
+        // Convert the bitmap to bytes
+        val baos = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos)
+        val imageData = baos.toByteArray()
+
+        // Store the image in Firebase Storage
+        val uploadImageTask = imagesRef.putBytes(imageData)
+        uploadImageTask.addOnSuccessListener { imageUploadTask ->
+            imagesRef.downloadUrl.addOnSuccessListener { imageUrl ->
+                Log.d("ImageDetailActivity", "Image uploaded to Firebase Storage. Image URL: $imageUrl")
+
+                // Store the classification text in Firebase Storage
+                val textBytes = classificationText.toByteArray()
+                val uploadTextTask = textRef.putBytes(textBytes)
+                uploadTextTask.addOnSuccessListener { textUploadTask ->
+                    textRef.downloadUrl.addOnSuccessListener { textUrl ->
+                        Log.d(
+                            "ImageDetailActivity",
+                            "Classification text uploaded to Firebase Storage. Text URL: $textUrl"
+                        )
+
+                        // Create a Firestore document reference
+                        val docRef = firebaseDB.collection("images")
+                            .document() // Use auto-generated ID for the document
+
+                        // Create a data object to be stored in Firestore
+                        val data = hashMapOf(
+                            "imageUrl" to imageUrl.toString(), // Replace imageUrl with the actual URL obtained
+                            "textUrl" to textUrl.toString(), // Replace textUrl with the actual URL obtained
+                            "classification" to classificationText,
+                            "userId" to currentUserID,
+                            "timestamp" to System.currentTimeMillis() // Add current time as a timestamp
+                        )
+
+                        // Save the data into Firestore
+                        docRef.set(data)
+                            .addOnSuccessListener {
+                                // Toast.makeText(this, "Uploaded Successfully", Toast.LENGTH_SHORT)
+                                //     .show()
+                                Log.d("ImageDetailActivity", "Image data saved successfully to Firestore")
+                            }
+                            .addOnFailureListener { e ->
+                                Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                                    .show()
+                                Log.e("ImageDetailActivity", "Error saving image data: ${e.message}")
+                            }
+                        //binding.progressBar.visibility = View.GONE
+                        //binding.imageView.setImageResource(R.drawable.vector)
+                    }.addOnFailureListener { textUrlFailure ->
+                        Toast.makeText(
+                            this,
+                            "Error getting text URL: ${textUrlFailure.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        Log.e("ImageDetailActivity", "Failed to get text URL: ${textUrlFailure.message}")
+                    }
+                }.addOnFailureListener { textUploadFailure ->
+                    Toast.makeText(
+                        this,
+                        "Error uploading classification text: ${textUploadFailure.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Log.e(
+                        "ImageDetailActivity",
+                        "Error uploading classification text: ${textUploadFailure.message}"
+                    )
+                }
+            }.addOnFailureListener { imageUrlFailure ->
+                Toast.makeText(
+                    this,
+                    "Error getting image URL: ${imageUrlFailure.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+                Log.e("ImageDetailActivity", "Failed to get image URL: ${imageUrlFailure.message}")
+            }
+        }.addOnFailureListener { imageUploadFailure ->
+            Toast.makeText(
+                this,
+                "Error uploading image: ${imageUploadFailure.message}",
+                Toast.LENGTH_SHORT
+            ).show()
+            Log.e("ImageDetailActivity", "Error uploading image: ${imageUploadFailure.message}")
+        }
+    }
+
+
+    private fun fetchImageUrlsFromFirestore() {
+        val items = mutableListOf<Item>()
+        val noImageText = findViewById<TextView>(R.id.noImageText)
+        // Date needs to be global -- fixed
+        val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
+        currentUserID?.let { uid ->
+            firestoreDB.collection("images")
+                .whereEqualTo("userId", uid)
+                .whereEqualTo("timestamp", date.text.toString())
+                .get()
+                .addOnSuccessListener { result ->
+                    for (document in result) {
+                        val imageUrl = document.getString("imageUrl")
+                        val text = document.getString("classification") + " " +
+                                document.getString("tag")
+                        //val tag = document.getString("tag")
+                        imageUrl?.let {
+                            noImageText.visibility = View.GONE
+                            text?.let { it1 -> Item(it1, it) }?.let { it2 -> items.add(it2) }
+                            // tag?.let{it1 -> Item(it1, it) }?.let { it2 -> items.add(it2) }
+                        }
+                    }
+
+                    val adapter: ImageAdapter
+                    if (items.isEmpty()) {
+                        noImageText.text = "No Spaces Submitted"
+                        noImageText.visibility = View.VISIBLE
+                        recyclerView.visibility = View.GONE
+                    } else {
+
+                        val adapter = ImageAdapter(items) { selectedItem ->
+                            // Handle the click here, for example, navigate to a new activity
+                            val intent = Intent(this, ToDoListActivity::class.java)
+                            intent.putExtra("imgUrl", selectedItem.imageUrl)
+                            intent.putExtra("classification", selectedItem.text)
+                            startActivity(intent)
+                        }
+
+                        // adapter = ImageAdapter(items)
+
+                        // Show RecyclerView and set the adapter when images are present
+                        recyclerView.visibility = View.VISIBLE
+                        recyclerView.adapter = adapter
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    exception.printStackTrace()
+                }
+        }
+    }
 }
