@@ -95,7 +95,6 @@ class FeedbackActivity : AppCompatActivity() {
             val cleanMessageTextView = findViewById<TextView>(R.id.cleanTextResult)
             cleanMessageTextView.visibility = View.VISIBLE
             cleanMessageTextView.text = cleanMessage
-            //Toast.makeText(this, "No checklist available for clean image", Toast.LENGTH_SHORT).show()
         }
 
 

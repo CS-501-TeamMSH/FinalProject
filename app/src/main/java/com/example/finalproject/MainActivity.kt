@@ -65,6 +65,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var firebaseDB: FirebaseFirestore
 
     private val calendarIcon = Calendar.getInstance()
+    //private val classification = intent.getStringExtra("classification")
+    private var messyCount: Int = 0
 
     private lateinit var date: TextView
     private lateinit var currentUserID: String
@@ -88,7 +90,7 @@ class MainActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.recycler)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
 
-        fetchImageUrlsFromFirestore()
+       // fetchImageUrlsFromFirestore()
 
         fabButton = findViewById(R.id.fabAdd)
 
@@ -117,18 +119,22 @@ class MainActivity : AppCompatActivity() {
 
                     val selectedDate = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
                         .format(calendarIcon.time)
-                    Toast.makeText(this, "Selected Date: $selectedDate", Toast.LENGTH_SHORT).show()
+                  //  Toast.makeText(this, "Selected Date: $selectedDate", Toast.LENGTH_SHORT).show()
 
                     date.text = selectedDate
+                    //Log.d("Main", messyCount.toString())
+                    Log.d("String", selectedDate)
                     fetchImageUrlsFromFirestore()
+                    //updateCalendarCircle(messyCount)
+
                 },
                 calendarIcon.get(Calendar.YEAR),
                 calendarIcon.get(Calendar.MONTH),
                 calendarIcon.get(Calendar.DAY_OF_MONTH)
             )
 
-            // Set the maximum date to the current date to blur out dates after the current date
             datePickerDialog.datePicker.maxDate = currentDate.timeInMillis
+
 
             // Show the DatePickerDialog
             datePickerDialog.show()
@@ -231,7 +237,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun fetchImageUrlsFromFirestore() {
-        val items = mutableListOf<Item>()
+        var mess = 0
+        var messyItems = mutableListOf<Item>()
+        var cleanItems = mutableListOf<Item>()
         val noImageText = findViewById<TextView>(R.id.noImageText)
         val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
         currentUserID?.let { uid ->
@@ -242,31 +250,39 @@ class MainActivity : AppCompatActivity() {
                 .addOnSuccessListener { result ->
                     for (document in result) {
                         val imageUrl = document.getString("imageUrl")
-                        val classification = document.getString("classification")
-                            ?.let { capitalize(it) }
+                        val classification = document.getString("classification")?.let { capitalize(it) }
+                        if(classification == "Messy") {
+                            mess +=1
+                        }
                         val tag = document.getString("tag")?.let { capitalize(it) }
-
 
                         imageUrl?.let {
                             noImageText.visibility = View.GONE
                             tag?.let { it1 ->
                                 classification?.let { it2 ->
-                                    Item(it1, it2, it)
-                                }?.let { it3 ->
-                                    items.add(it3)
+                                    val item = Item(it1, it2, it)
+                                    if (it2 == "Messy") {
+                                        messyItems.add(item)
+                                    } else {
+                                        cleanItems.add(item)
+                                    }
                                 }
                             }
                         }
                     }
 
-                    if (items.isEmpty()) {
+                    if (messyItems.isEmpty() && cleanItems.isEmpty()) {
                         noImageText.text = "No Spaces Submitted"
                         noImageText.visibility = View.VISIBLE
                         recyclerView.visibility = View.GONE
+                        mess = -1
+                        updateCalendarCircle(mess)
                     } else {
+                        val items = mutableListOf<Item>()
+                        items.addAll(messyItems)
+                        items.addAll(cleanItems)
 
                         val adapter = ImageAdapter(items) { selectedItem ->
-                            // Handle the click here, for example, navigate to a new activity
                             val intent = Intent(this, FeedbackActivity::class.java)
                             intent.putExtra("imgUrl", selectedItem.imageUrl)
                             intent.putExtra("classification", selectedItem.classification)
@@ -274,16 +290,42 @@ class MainActivity : AppCompatActivity() {
                             startActivity(intent)
                         }
 
-                        // Show RecyclerView and set the adapter when images are present
                         recyclerView.visibility = View.VISIBLE
                         recyclerView.adapter = adapter
+
                     }
+                    Log.d("String", mess.toString())
+                    updateCalendarCircle(mess)
                 }
                 .addOnFailureListener { exception ->
                     exception.printStackTrace()
                 }
         }
     }
+
+    private fun updateCalendarCircle(messy: Int) {
+        val calendarButton = findViewById<ImageButton>(R.id.calendarButton)
+
+        val greenDrawable = ContextCompat.getDrawable(this, R.drawable.baseline_green_calendar_month_24)
+        val redDrawable = ContextCompat.getDrawable(this, R.drawable.baseline_red_calendar_month_24)
+        val grayDrawable = ContextCompat.getDrawable(this, R.drawable.baseline_calendar_month_24)
+
+        if (messy >= 1) {
+            calendarButton.setImageDrawable(redDrawable)
+            Toast.makeText(this, "You have $messy messy spaces!", Toast.LENGTH_LONG).show()
+        }
+
+       else if (messy == -1) {
+            calendarButton.setImageDrawable(grayDrawable)
+        }
+
+        else {
+            calendarButton.setImageDrawable(greenDrawable )
+        }
+    }
+
+
+
 
     fun capitalize(str: String): String {
         return str.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
