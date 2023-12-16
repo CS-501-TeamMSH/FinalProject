@@ -3,9 +3,11 @@ package com.example.finalproject
 import ChecklistAdapter
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,7 +18,7 @@ class FeedbackActivity : AppCompatActivity() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var backButton: Button
-
+    private var checkedItems: MutableSet<String> = mutableSetOf()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_feedback)
@@ -46,39 +48,50 @@ class FeedbackActivity : AppCompatActivity() {
         val checklistSegmentButton =
             findViewById<MaterialButtonToggleGroup>(R.id.checklistSegmentButton)
 
-        // Default Checklist depending on tag
-        when (tag) {
-            "Office" -> {
-                checklistSegmentButton.check(R.id.button1)
-                updateChecklist(getOfficeChecklist())
-            }
+        if (classification.equals("Messy")) {
+            checklistSegmentButton.visibility = View.VISIBLE
 
-            "Kitchen" -> {
-                checklistSegmentButton.check(R.id.button2)
-                updateChecklist(getKitchenChecklist())
-            }
-            else -> {
-                checklistSegmentButton.check(R.id.button3)
-                updateChecklist(getOtherChecklist())
-            }
-        }
+            // Default Checklist depending on tag
+            when (tag) {
+                "Office" -> {
+                    checklistSegmentButton.check(R.id.button1)
+                    updateChecklist(getOfficeChecklist())
+                }
 
-        checklistSegmentButton.addOnButtonCheckedListener { group, checkedId, isChecked ->
-            if (isChecked && checkedId == group.checkedButtonId) {
-                when (checkedId) {
-                    R.id.button1 -> updateChecklist(getOfficeChecklist())
-                    R.id.button2 -> updateChecklist(getKitchenChecklist())
-                    R.id.button3 -> updateChecklist(getOtherChecklist())
+                "Kitchen" -> {
+                    checklistSegmentButton.check(R.id.button2)
+                    updateChecklist(getKitchenChecklist())
+                }
+
+                else -> {
+                    checklistSegmentButton.check(R.id.button3)
+                    updateChecklist(getOtherChecklist())
                 }
             }
-        }
 
+            checklistSegmentButton.addOnButtonCheckedListener { group, checkedId, isChecked ->
+                if (isChecked && checkedId == group.checkedButtonId) {
+                    when (checkedId) {
+                        R.id.button1 -> updateChecklist(getOfficeChecklist())
+                        R.id.button2 -> updateChecklist(getKitchenChecklist())
+                        R.id.button3 -> updateChecklist(getOtherChecklist())
+                    }
+                }
+            }
+        } else {
+            checklistSegmentButton.visibility = View.GONE
+            val cleanMessage = getCleanMessage()
+            val cleanMessageTextView = findViewById<TextView>(R.id.cleanTextResult)
+            cleanMessageTextView.visibility = View.VISIBLE
+            cleanMessageTextView.text = cleanMessage
+
+            //Toast.makeText(this, "No checklist available for clean image", Toast.LENGTH_SHORT).show()
+        }
 
         backButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
-
     }
 
     private fun updateChecklist(checklist: List<String>) {
@@ -113,5 +126,10 @@ class FeedbackActivity : AppCompatActivity() {
             "Sweep and mop the floors",
             "Remove any trip hazards"
         )
+    }
+
+    private fun getCleanMessage(): String {
+        return ("Maintain cleanliness & safety standards")
+
     }
 }

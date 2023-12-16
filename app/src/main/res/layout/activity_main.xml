@@ -22,19 +22,22 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <TextView
-            android:id="@+id/seeHistoryButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="236dp"
-            android:layout_marginTop="24dp"
-            android:minHeight="48dp"
-            android:onClick="seeHistory"
-            android:text="Compliance History"
-            android:textColor="#0000FF"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+<!--        <TextView-->
+<!--            android:id="@+id/seeHistoryButton"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginStart="236dp"-->
+<!--            android:layout_marginTop="24dp"-->
+<!--            android:minHeight="48dp"-->
+<!--            android:onClick="seeHistory"-->
+<!--            android:text="Compliance History"-->
+<!--            android:textColor="#0000FF"-->
+<!--            android:textSize="16sp"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toTopOf="parent" />-->
+
+
+
 
         <TextView
             android:id="@+id/dashtitle"
