@@ -14,6 +14,9 @@ import android.text.Html
 import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.view.animation.Animation
+import android.view.animation.LinearInterpolator
+import android.view.animation.TranslateAnimation
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
@@ -29,8 +32,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import org.w3c.dom.Text
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
@@ -51,6 +59,8 @@ class MainActivity : AppCompatActivity() {
     private var imageUri: Uri? = null
 
     private lateinit var calendar: ImageButton
+    private lateinit var messyText: TextView
+    private lateinit var compliance: TextView
 
     private lateinit var signOut: TextView
 
@@ -66,7 +76,7 @@ class MainActivity : AppCompatActivity() {
 
     private val calendarIcon = Calendar.getInstance()
     //private val classification = intent.getStringExtra("classification")
-    private var messyCount: Int = 0
+    private var messyCount: Int=0
 
     private lateinit var date: TextView
     private lateinit var currentUserID: String
@@ -94,9 +104,13 @@ class MainActivity : AppCompatActivity() {
 
         fabButton = findViewById(R.id.fabAdd)
 
-        signOut = findViewById<TextView>(R.id.signOutButton)
+        signOut = findViewById(R.id.signOutButton)
 
-        calendar = findViewById<ImageButton>(R.id.calendarButton)
+        compliance = findViewById(R.id.compliance)
+
+        calendar = findViewById(R.id.calendarButton)
+
+        messyText = findViewById(R.id.dashtitle)
 
         // Fetch image URLs from Firebase Firestore
         fetchImageUrlsFromFirestore()
@@ -120,7 +134,6 @@ class MainActivity : AppCompatActivity() {
                     val selectedDate = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
                         .format(calendarIcon.time)
                   //  Toast.makeText(this, "Selected Date: $selectedDate", Toast.LENGTH_SHORT).show()
-
                     date.text = selectedDate
                     //Log.d("Main", messyCount.toString())
                     Log.d("String", selectedDate)
@@ -135,12 +148,21 @@ class MainActivity : AppCompatActivity() {
 
             datePickerDialog.datePicker.maxDate = currentDate.timeInMillis
 
-
-            // Show the DatePickerDialog
             datePickerDialog.show()
         }
 
+        compliance.setOnClickListener {
+            val intent = Intent(this, ComplianceActivity::class.java)
+            intent.putExtra("Count", messyCount.toString())
+            intent.putExtra("Date", date.text.toString())
 
+            Log.d("String", messyCount.toString())
+            Log.d("String",  date.text.toString())
+            startActivity(intent)
+            finish()
+
+            TODO("Implement Historical Compliance View")
+        }
 
         signOut.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
@@ -275,8 +297,7 @@ class MainActivity : AppCompatActivity() {
                         noImageText.text = "No Spaces Submitted"
                         noImageText.visibility = View.VISIBLE
                         recyclerView.visibility = View.GONE
-                        mess = -1
-                        updateCalendarCircle(mess)
+
                     } else {
                         val items = mutableListOf<Item>()
                         items.addAll(messyItems)
@@ -294,37 +315,41 @@ class MainActivity : AppCompatActivity() {
                         recyclerView.adapter = adapter
 
                     }
-                    Log.d("String", mess.toString())
-                    updateCalendarCircle(mess)
+                //    Log.d("String", mess.toString())
+                    messyText.text = "Non-Compliant Spaces: $mess"
+                    messyCount= mess
+                    //"Uncomment below function if you like the sliding UI"
+                   // startScrollingAnimation()
+
                 }
                 .addOnFailureListener { exception ->
                     exception.printStackTrace()
                 }
         }
     }
+    private fun startScrollingAnimation() {
+        val messyText = findViewById<TextView>(R.id.dashtitle)
 
-    private fun updateCalendarCircle(messy: Int) {
-        val calendarButton = findViewById<ImageButton>(R.id.calendarButton)
+        // Calculate width of the screen
+        val screenWidth = resources.displayMetrics.widthPixels.toFloat()
 
-        val greenDrawable = ContextCompat.getDrawable(this, R.drawable.baseline_green_calendar_month_24)
-        val redDrawable = ContextCompat.getDrawable(this, R.drawable.baseline_red_calendar_month_24)
-        val grayDrawable = ContextCompat.getDrawable(this, R.drawable.baseline_calendar_month_24)
+        // Calculate width of the text
+        val textWidth = messyText.paint.measureText(messyText.text.toString())
 
-        if (messy >= 1) {
-            calendarButton.setImageDrawable(redDrawable)
-            Toast.makeText(this, "You have $messy messy spaces!", Toast.LENGTH_LONG).show()
-        }
+        // Create a translation animation that moves text from right to left
+        val scrollAnimation = TranslateAnimation(
+            screenWidth, -textWidth,  // start and end X coordinates
+            0f, 0f                   // start and end Y coordinates (no vertical movement)
+        )
 
-       else if (messy == -1) {
-            calendarButton.setImageDrawable(grayDrawable)
-        }
+        // Set animation properties
+        scrollAnimation.duration = 8000  // Adjust the duration as needed
+        scrollAnimation.repeatCount = Animation.INFINITE
+        scrollAnimation.interpolator = LinearInterpolator()  // Linear movement
 
-        else {
-            calendarButton.setImageDrawable(greenDrawable )
-        }
+        // Set the animation to the TextView
+        messyText.startAnimation(scrollAnimation)
     }
-
-
 
 
     fun capitalize(str: String): String {

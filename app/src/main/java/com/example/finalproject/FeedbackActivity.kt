@@ -100,6 +100,7 @@ class FeedbackActivity : AppCompatActivity() {
 
         backButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
+
             startActivity(intent)
         }
     }

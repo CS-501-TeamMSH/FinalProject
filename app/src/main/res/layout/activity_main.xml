@@ -7,17 +7,26 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-
-
-
-        <!--- add search?? -->
+        <TextView
+            android:id="@+id/compliance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="244dp"
+            android:layout_marginTop="16dp"
+            android:minHeight="48dp"
+            android:onClick="compliancr"
+            android:text="Compliance History"
+            android:textColor="#0000FF"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/signOutButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="332dp"
-            android:layout_marginTop="24dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
             android:minHeight="48dp"
             android:onClick="signOut"
             android:text="Sign Out"
@@ -30,35 +39,39 @@
             android:id="@+id/dashtitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="40sp"
             android:layout_marginStart="16dp"
-            android:textSize="28sp"
+            android:layout_marginTop="40sp"
             android:text="Compliance Dashboard"
             android:textAppearance="@font/ubuntu_bold"
-            app:layout_constraintTop_toTopOf="@id/signOutButton"
-            app:layout_constraintStart_toStartOf="parent"
+            android:textSize="28sp"
+            app:layout_constraintBottom_toTopOf="@id/date"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/date" />
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/signOutButton" />
+
+        <!-- Constraint to the calendar button -->
 
         <TextView
             android:id="@+id/date"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="18dp"
-            android:layout_marginTop="8sp"
+            android:layout_marginTop="16dp"
             android:layout_marginEnd="12sp"
-            android:textSize="16sp"
             android:textAppearance="@font/ubuntu_bold"
-            app:layout_constraintTop_toBottomOf="@id/dashtitle"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@id/calendarButton"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/calendarButton" /> <!-- Constraint to the calendar button -->
+            app:layout_constraintTop_toBottomOf="@id/dashtitle" />
 
         <ImageButton
             android:id="@+id/calendarButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8sp"
-            android:layout_marginEnd="12sp"
+            android:layout_marginEnd="24dp"
             android:background="?android:selectableItemBackground"
             android:contentDescription="Calendar"
             android:src="@drawable/baseline_calendar_month_24"
