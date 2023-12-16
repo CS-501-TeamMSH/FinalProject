@@ -79,14 +79,25 @@ class FeedbackActivity : AppCompatActivity() {
                 }
             }
         } else {
-            checklistSegmentButton.visibility = View.GONE
+
+            when (tag) {
+                "Office" -> {
+                    checklistSegmentButton.check(R.id.button1)
+                }
+                "Kitchen" -> {
+                    checklistSegmentButton.check(R.id.button2)
+                }
+                else -> {
+                    checklistSegmentButton.check(R.id.button3)
+                }
+            }
             val cleanMessage = getCleanMessage()
             val cleanMessageTextView = findViewById<TextView>(R.id.cleanTextResult)
             cleanMessageTextView.visibility = View.VISIBLE
             cleanMessageTextView.text = cleanMessage
-
             //Toast.makeText(this, "No checklist available for clean image", Toast.LENGTH_SHORT).show()
         }
+
 
         backButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
@@ -133,3 +144,4 @@ class FeedbackActivity : AppCompatActivity() {
 
     }
 }
+
