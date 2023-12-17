@@ -12,7 +12,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.button.MaterialButtonToggleGroup
 import com.squareup.picasso.Picasso
 
 class FeedbackActivity : AppCompatActivity() {
@@ -49,50 +48,37 @@ class FeedbackActivity : AppCompatActivity() {
 
         backButton = findViewById<Button>(R.id.backButton)
 
-        val checklistSegmentButton =
-            findViewById<MaterialButtonToggleGroup>(R.id.checklistSegmentButton)
 
         if (classification.equals("Messy")) {
-            checklistSegmentButton.visibility = View.VISIBLE
 
             // Default Checklist depending on tag
             when (tag) {
                 "Office" -> {
-                    checklistSegmentButton.check(R.id.button1)
                     updateChecklist(getOfficeChecklist())
                 }
 
                 "Kitchen" -> {
-                    checklistSegmentButton.check(R.id.button2)
                     updateChecklist(getKitchenChecklist())
                 }
 
                 else -> {
-                    checklistSegmentButton.check(R.id.button3)
                     updateChecklist(getOtherChecklist())
                 }
             }
 
-            checklistSegmentButton.addOnButtonCheckedListener { group, checkedId, isChecked ->
-                if (isChecked && checkedId == group.checkedButtonId) {
-                    when (checkedId) {
-                        R.id.button1 -> updateChecklist(getOfficeChecklist())
-                        R.id.button2 -> updateChecklist(getKitchenChecklist())
-                        R.id.button3 -> updateChecklist(getOtherChecklist())
-                    }
-                }
-            }
         } else {
 
             when (tag) {
                 "Office" -> {
-                    checklistSegmentButton.check(R.id.button1)
+                    updateChecklist(getOfficeChecklist())
                 }
+
                 "Kitchen" -> {
-                    checklistSegmentButton.check(R.id.button2)
+                    updateChecklist(getKitchenChecklist())
                 }
+
                 else -> {
-                    checklistSegmentButton.check(R.id.button3)
+                    updateChecklist(getOtherChecklist())
                 }
             }
             val cleanMessage = getCleanMessage()
