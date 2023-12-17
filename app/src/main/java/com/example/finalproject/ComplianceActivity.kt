@@ -1,69 +1,81 @@
 package com.example.finalproject
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.example.finalproject.HistoryItem
 import org.w3c.dom.Text
 
 class ComplianceActivity : AppCompatActivity() {
 
-    private lateinit var button: Button
-
-    private lateinit var dateText: TextView
-    private lateinit var countText: TextView
+    private val firestoreDB = FirebaseFirestore.getInstance()
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var backButton: Button
+    private lateinit var textView: TextView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_compliance)
 
-        val count = intent.getStringExtra("Count")
-        val date = intent.getStringExtra("Date")
+        backButton = findViewById(R.id.backButton)
+        textView = findViewById(R.id.historyTitle)
 
-        dateText = findViewById(R.id.dateTextView)
-        countText = findViewById(R.id.countTextView)
+        recyclerView = findViewById(R.id.historyRecycler)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        fetchHistoryFromFirebase()
 
-
-        dateText.text = date.toString()
-
-        countText.text = count.toString()
-
-
-//// Create a list with a single ComplianceItem using the received count and date
-//        val itemList = mutableListOf<ComplianceItem>()
-//        if (count != null && date != null) {
-//            val complianceItem = ComplianceItem(date, count)
-//            itemList.add(complianceItem)
-//        }
-//        val recyclerView: RecyclerView = findViewById(R.id.recycler)
-//        val layoutManager = LinearLayoutManager(this)
-//        val adapter = ComplianceAdapter(itemList)
-//
-//        recyclerView.layoutManager = layoutManager
-//        recyclerView.adapter = adapter
-
-
-        //Log.d("S", count.toString())
-       // Log.d("S", date.toString())
-
-
-
-
-        button = findViewById(R.id.backButton)
-
-        button.setOnClickListener{
-            val intent = Intent(this,MainActivity::class.java)
+        backButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         }
-        Toast.makeText(this, "here", Toast.LENGTH_SHORT).show()
     }
+
+    private fun fetchHistoryFromFirebase() {
+        val historyList = mutableListOf<HistoryItem>()
+        val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
+
+        currentUserID?.let { uid ->
+            firestoreDB.collection("images")
+                .whereEqualTo("userId", uid)
+                .get()
+                .addOnSuccessListener { result ->
+                    val historyMap = mutableMapOf<String, Int>()
+
+                    for (document in result) {
+                        val timestamp = document.getString("timestamp")
+                        val classification = document.getString("classification")
+
+                        if (timestamp != null && classification == "Messy") {
+                            historyMap[timestamp] = (historyMap[timestamp] ?: 0) + 1
+                        }
+                    }
+
+                    Log.d("History Map", historyMap.toString())
+
+                    for ((date, messyCount) in historyMap) {
+                        historyList.add(HistoryItem(date,messyCount))
+                    }
+
+                    val adapter = ComplianceAdapter(historyList)
+                    recyclerView.visibility = View.VISIBLE
+                    recyclerView.adapter = adapter
+
+//                    // Update the total messy count
+//                    val totalMessyCount = historyList.sumBy { it.messyCount }
+//                    messyText.text = "Non-Compliant Spaces: $totalMessyCount"
+                }
+                .addOnFailureListener { exception ->
+                    exception.printStackTrace()
+                }
+        }
+    }
+
 }
-
-data class ComplianceItem(val date: String, val count: String)
-
-
