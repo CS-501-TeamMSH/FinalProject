@@ -70,15 +70,15 @@ class FeedbackActivity : AppCompatActivity() {
 
             when (tag) {
                 "Office" -> {
-                    updateChecklist(getOfficeChecklist())
+                    getCleanMessage()
                 }
 
                 "Kitchen" -> {
-                    updateChecklist(getKitchenChecklist())
+                    getCleanMessage()
                 }
 
                 else -> {
-                    updateChecklist(getOtherChecklist())
+                    getCleanMessage()
                 }
             }
             val cleanMessage = getCleanMessage()
