@@ -12,7 +12,9 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.text.Html
 import android.util.Log
+import android.view.GestureDetector
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
@@ -25,6 +27,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.finalproject.ml.ModelUnquant
@@ -41,6 +44,7 @@ import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
 import org.w3c.dom.Text
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import java.lang.Math.abs
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.text.SimpleDateFormat
@@ -112,9 +116,15 @@ class MainActivity : AppCompatActivity() {
 
         messyText = findViewById(R.id.dashtitle)
 
+        // Init Swipe Listener
+        val swipeListener = GestureDetectorCompat(this, SwipeListener())
+
+        recyclerView.setOnTouchListener { _, event ->
+            swipeListener.onTouchEvent(event)
+        }
+
         // Fetch image URLs from Firebase Firestore
         fetchImageUrlsFromFirestore()
-
 
         fabButton.setOnClickListener {
             showPictureDialog()
@@ -151,18 +161,18 @@ class MainActivity : AppCompatActivity() {
             datePickerDialog.show()
         }
 
-        compliance.setOnClickListener {
-            val intent = Intent(this, ComplianceActivity::class.java)
-            intent.putExtra("Count", messyCount.toString())
-            intent.putExtra("Date", date.text.toString())
-
-            Log.d("String", messyCount.toString())
-            Log.d("String",  date.text.toString())
-            startActivity(intent)
-            finish()
-
-            TODO("Implement Historical Compliance View")
-        }
+//        compliance.setOnClickListener {
+//            val intent = Intent(this, ComplianceActivity::class.java)
+//            intent.putExtra("Count", messyCount.toString())
+//            intent.putExtra("Date", date.text.toString())
+//
+//            Log.d("String", messyCount.toString())
+//            Log.d("String",  date.text.toString())
+//            startActivity(intent)
+//            finish()
+//
+//            TODO("Implement Historical Compliance View")
+//        }
 
         signOut.setOnClickListener {
             FirebaseAuth.getInstance().signOut()
@@ -355,4 +365,52 @@ class MainActivity : AppCompatActivity() {
     fun capitalize(str: String): String {
         return str.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     }
+
+    // Swipe Gesture Helpers
+
+    inner class SwipeListener : GestureDetector.SimpleOnGestureListener() {
+        private val SWIPE_THRESHOLD = 100
+        private val SWIPE_VELOCITY_THRESHOLD = 100
+
+        override fun onFling(
+            e1: MotionEvent?,
+            e2: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+
+            val diffX = e2.x - (e1?.x ?: 0f)
+            val diffY = e2.y - (e1?.y ?: 0f)
+
+            if (kotlin.math.abs(diffX) > kotlin.math.abs(diffY) &&
+                kotlin.math.abs(diffX) > SWIPE_THRESHOLD &&
+                kotlin.math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD
+            ) {
+                if (diffX > 0) {
+                    // Swiped right
+                    Log.d("SwipeListener", "Swiped right")
+                    updateDate(-1) // Move to the previous date
+                } else {
+                    // Swiped left
+                    Log.d("SwipeListener", "Swiped left")
+                    updateDate(1) // Move to the next date
+                }
+                return true
+            }
+            return super.onFling(e1, e2, velocityX, velocityY)
+        }
+    }
+
+    private fun updateDate(days: Int) {
+        val currentDate = calendarIcon.time
+        val newDate = Calendar.getInstance()
+        newDate.time = currentDate
+        newDate.add(Calendar.DAY_OF_MONTH, days)
+
+        val selectedDate = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault()).format(newDate.time)
+        date.text = selectedDate
+        fetchImageUrlsFromFirestore()
+    }
+
+
 }
