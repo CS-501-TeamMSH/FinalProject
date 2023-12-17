@@ -23,8 +23,8 @@ class ComplianceActivity : AppCompatActivity() {
     private lateinit var textView: TextView
     private lateinit var countView: TextView
 
-    private lateinit var  messyTextView: TextView
-    private lateinit var  cleanTextView: TextView
+    private lateinit var messyTextView: TextView
+    private lateinit var cleanTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +41,7 @@ class ComplianceActivity : AppCompatActivity() {
         textView = findViewById(R.id.historyTitle)
 
         messyTextView = findViewById(R.id.messyTotal)
-       // countView = findViewById(R.id.historyCount) // Add this line to reference the count TextView
+        // countView = findViewById(R.id.historyCount) // Add this line to reference the count TextView
 
         recyclerView = findViewById(R.id.historyRecycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -79,24 +79,24 @@ class ComplianceActivity : AppCompatActivity() {
                     }
 
                     messyTextView.text = "Messy Total: $totalMessyCount"
-                //    cleanTextView.text = "Clean Total: $totalCleanCount"
+                    //    cleanTextView.text = "Clean Total: $totalCleanCount"
 
 
-                for ((date, messyCount) in historyMap) {
-                val isMessy = messyCount > 0
-                    Log.d("isMessy", isMessy.toString())
-                historyList.add(HistoryItem(date, messyCount, isMessy, false))
-               Log.d("History", "Date: $date, Messy Count: $messyCount pending items")
-            }
+                    for ((date, messyCount) in historyMap) {
+                        val isMessy = messyCount > 0
+                        Log.d("isMessy", isMessy.toString())
+                        historyList.add(HistoryItem(date, messyCount, isMessy, false))
+                        Log.d("History", "Date: $date, Messy Count: $messyCount pending items")
+                    }
 
-            for ((date, cleanCount) in historyMapClean) {
-                if (!historyMap.containsKey(date)) {
-                    val isClean = cleanCount > 0
-                    Log.d("isClean", isClean.toString())
-                    historyList.add(HistoryItem(date, cleanCount, false, isClean))
-                    Log.d("History", "Date: $date, Clean Count: $cleanCount items")
-                }
-            }
+                    for ((date, cleanCount) in historyMapClean) {
+                        if (!historyMap.containsKey(date)) {
+                            val isClean = cleanCount > 0
+                            Log.d("isClean", isClean.toString())
+                            historyList.add(HistoryItem(date, cleanCount, false, isClean))
+                            Log.d("History", "Date: $date, Clean Count: $cleanCount items")
+                        }
+                    }
 
                     val adapter = ComplianceAdapter(historyList)
                     recyclerView.visibility = View.VISIBLE
@@ -107,6 +107,11 @@ class ComplianceActivity : AppCompatActivity() {
                     exception.printStackTrace()
 
                 }
+        }
+
+        backButton.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
         }
     }
 }
