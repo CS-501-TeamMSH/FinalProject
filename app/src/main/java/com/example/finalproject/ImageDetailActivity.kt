@@ -345,11 +345,19 @@ class ImageDetailActivity : AppCompatActivity() {
 
                 3 -> {
                     // Camera
-                    val photo: Bitmap = data?.extras?.get("data") as Bitmap
-                    val uri = getImageUri(photo)
-                    displayImage(uri)
+                    val photo: Bitmap? = data?.extras?.get("data") as? Bitmap
+                    if (photo != null) {
+                        val uri = getImageUri(photo)
+                        displayImage(uri)
+                    } else {
+                        Log.e("Camera", "Failed to capture image from camera")
+                        // Handle the case where photo is null (capture failed)
+                    }
                 }
             }
+        } else {
+            Log.e("Camera", "Failed to capture image: resultCode = $resultCode")
+            // Handle the case where capturing image failed (resultCode indicates failure)
         }
     }
 
@@ -372,11 +380,7 @@ class ImageDetailActivity : AppCompatActivity() {
         val bytes = ByteBuffer.allocate(inImage.byteCount)
         inImage.copyPixelsToBuffer(bytes)
         val path = MediaStore.Images.Media.insertImage(
-            contentResolver,
-            inImage,
-            "Title",
-            null
-        )
+            contentResolver, inImage, "Title", null)
         return Uri.parse(path)
     }
 

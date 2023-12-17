@@ -79,7 +79,6 @@ class ComplianceActivity : AppCompatActivity() {
                     }
 
                     messyTextView.text = "Messy Total: $totalMessyCount"
-                    //    cleanTextView.text = "Clean Total: $totalCleanCount"
 
 
                     for ((date, messyCount) in historyMap) {
@@ -97,6 +96,8 @@ class ComplianceActivity : AppCompatActivity() {
                             Log.d("History", "Date: $date, Clean Count: $cleanCount items")
                         }
                     }
+
+                    historyList.sortWith(compareByDescending<HistoryItem> { it.isMessy }.thenByDescending { it.date })
 
                     val adapter = ComplianceAdapter(historyList)
                     recyclerView.visibility = View.VISIBLE
