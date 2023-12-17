@@ -1,5 +1,6 @@
 package com.example.finalproject
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -20,6 +21,11 @@ class ComplianceActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var backButton: Button
     private lateinit var textView: TextView
+    private lateinit var countView: TextView
+
+    private lateinit var  messyTextView: TextView
+    private lateinit var  cleanTextView: TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_compliance)
@@ -27,18 +33,19 @@ class ComplianceActivity : AppCompatActivity() {
         backButton = findViewById(R.id.backButton)
         textView = findViewById(R.id.historyTitle)
 
+
         recyclerView = findViewById(R.id.historyRecycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        fetchHistoryFromFirebase()
 
-        backButton.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-    }
+        backButton = findViewById(R.id.backButton)
+        textView = findViewById(R.id.historyTitle)
 
-    private fun fetchHistoryFromFirebase() {
+        messyTextView = findViewById(R.id.messyTotal)
+       // countView = findViewById(R.id.historyCount) // Add this line to reference the count TextView
+
+        recyclerView = findViewById(R.id.historyRecycler)
+        recyclerView.layoutManager = LinearLayoutManager(this)
+
         val historyList = mutableListOf<HistoryItem>()
         val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
 
@@ -48,34 +55,58 @@ class ComplianceActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { result ->
                     val historyMap = mutableMapOf<String, Int>()
+                    val historyMapClean = mutableMapOf<String, Int>()
 
                     for (document in result) {
                         val timestamp = document.getString("timestamp")
                         val classification = document.getString("classification")
 
-                        if (timestamp != null && classification == "Messy") {
+                        if (timestamp != null && classification == "messy") {
                             historyMap[timestamp] = (historyMap[timestamp] ?: 0) + 1
                         }
+
+                        if (timestamp != null && classification == "clean") {
+                            historyMapClean[timestamp] = (historyMapClean[timestamp] ?: 0) + 1
+                        }
+
                     }
 
-                    Log.d("History Map", historyMap.toString())
+                    var totalMessyCount = 0
+                    var totalCleanCount = 0
 
-                    for ((date, messyCount) in historyMap) {
-                        historyList.add(HistoryItem(date,messyCount))
+                    for ((_, messyCount) in historyMap) {
+                        totalMessyCount += messyCount
                     }
+
+                    messyTextView.text = "Messy Total: $totalMessyCount"
+                //    cleanTextView.text = "Clean Total: $totalCleanCount"
+
+
+                for ((date, messyCount) in historyMap) {
+                val isMessy = messyCount > 0
+                    Log.d("isMessy", isMessy.toString())
+                historyList.add(HistoryItem(date, messyCount, isMessy, false))
+               Log.d("History", "Date: $date, Messy Count: $messyCount pending items")
+            }
+
+            for ((date, cleanCount) in historyMapClean) {
+                if (!historyMap.containsKey(date)) {
+                    val isClean = cleanCount > 0
+                    Log.d("isClean", isClean.toString())
+                    historyList.add(HistoryItem(date, cleanCount, false, isClean))
+                    Log.d("History", "Date: $date, Clean Count: $cleanCount items")
+                }
+            }
 
                     val adapter = ComplianceAdapter(historyList)
                     recyclerView.visibility = View.VISIBLE
                     recyclerView.adapter = adapter
-
-//                    // Update the total messy count
-//                    val totalMessyCount = historyList.sumBy { it.messyCount }
-//                    messyText.text = "Non-Compliant Spaces: $totalMessyCount"
                 }
+
                 .addOnFailureListener { exception ->
                     exception.printStackTrace()
+
                 }
         }
     }
-
 }
