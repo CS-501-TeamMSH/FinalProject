@@ -3,6 +3,7 @@ package com.example.finalproject
 import ChecklistAdapter
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
@@ -25,6 +26,9 @@ class FeedbackActivity : AppCompatActivity() {
         val imgUrl = intent.getStringExtra("imgUrl")
         val classification = intent.getStringExtra("classification")
         val tag = intent.getStringExtra("tag")
+        val date = intent.getStringExtra("date")
+        Log.d("Date", date.toString())
+
         var img = findViewById<ImageView>(R.id.feedbackimage)
         var text = findViewById<TextView>(R.id.feedbacktext)
         val feedbackIcon = findViewById<ImageView>(R.id.feedbackClassificationIcon)
@@ -100,8 +104,9 @@ class FeedbackActivity : AppCompatActivity() {
 
         backButton.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
-
+            intent.putExtra("date", date)
             startActivity(intent)
+            finish()
         }
     }
 

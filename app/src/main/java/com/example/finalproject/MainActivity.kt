@@ -6,14 +6,11 @@ import android.app.DatePickerDialog
 import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.text.Html
 import android.util.Log
 import android.view.GestureDetector
-import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.Animation
@@ -22,7 +19,6 @@ import android.view.animation.TranslateAnimation
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -30,28 +26,15 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.GestureDetectorCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.finalproject.ml.ModelUnquant
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import org.tensorflow.lite.DataType
-import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
-import org.w3c.dom.Text
-import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.lang.Math.abs
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     private val firestoreDB = FirebaseFirestore.getInstance()
@@ -94,6 +77,13 @@ class MainActivity : AppCompatActivity() {
         val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
         val formattedDate: String = dateFormat.format(today)
         date.text = formattedDate
+
+        val receivedDate = intent.getStringExtra("date")
+        if (receivedDate != null) {
+            date.text = receivedDate
+            Log.d("Date", date.text.toString())
+            fetchImageUrlsFromFirestore()
+        }
 
 
         firebaseAuth = FirebaseAuth.getInstance()
@@ -141,6 +131,7 @@ class MainActivity : AppCompatActivity() {
                     calendarIcon.set(Calendar.MONTH, month)
                     calendarIcon.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
+
                     val selectedDate = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
                         .format(calendarIcon.time)
                   //  Toast.makeText(this, "Selected Date: $selectedDate", Toast.LENGTH_SHORT).show()
@@ -150,28 +141,35 @@ class MainActivity : AppCompatActivity() {
                     fetchImageUrlsFromFirestore()
                     //updateCalendarCircle(messyCount)
 
+
                 },
                 calendarIcon.get(Calendar.YEAR),
                 calendarIcon.get(Calendar.MONTH),
                 calendarIcon.get(Calendar.DAY_OF_MONTH)
             )
 
+
+
             datePickerDialog.datePicker.maxDate = currentDate.timeInMillis
 
             datePickerDialog.show()
+
         }
 
-//        compliance.setOnClickListener {
-//            val intent = Intent(this, ComplianceActivity::class.java)
-//            intent.putExtra("Count", messyCount.toString())
-//            intent.putExtra("Date", date.text.toString())
+
+
+        compliance.setOnClickListener {
+            val intent = Intent(this, ComplianceActivity::class.java)
+            intent.putExtra("Count", messyCount.toString())
+            intent.putExtra("Date", date.text.toString())
+
+            Log.d("String", messyCount.toString())
+            Log.d("String", date.text.toString())
+            startActivity(intent)
+            finish()
+        }
 //
-//            Log.d("String", messyCount.toString())
-//            Log.d("String",  date.text.toString())
-//            startActivity(intent)
-//            finish()
-//
-//            TODO("Implement Historical Compliance View")
+//            //TODO("Implement Historical Compliance View")
 //        }
 
         signOut.setOnClickListener {
@@ -271,6 +269,8 @@ class MainActivity : AppCompatActivity() {
     private fun fetchImageUrlsFromFirestore() {
         var mess = 0
         var messyItems = mutableListOf<Item>()
+        val selectedDate = date.text
+      //  Log.d("Date", selectedDate.toString())
         var cleanItems = mutableListOf<Item>()
         val noImageText = findViewById<TextView>(R.id.noImageText)
         val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
@@ -318,6 +318,7 @@ class MainActivity : AppCompatActivity() {
                             intent.putExtra("imgUrl", selectedItem.imageUrl)
                             intent.putExtra("classification", selectedItem.classification)
                             intent.putExtra("tag", selectedItem.tag)
+                            intent.putExtra("date", selectedDate.toString())
                             startActivity(intent)
                         }
 
