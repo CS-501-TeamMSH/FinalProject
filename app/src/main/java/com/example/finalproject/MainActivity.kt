@@ -292,7 +292,9 @@ class MainActivity : AppCompatActivity() {
                             noImageText.visibility = View.GONE
                             tag?.let { it1 ->
                                 classification?.let { it2 ->
-                                    val item = Item(it1, it2, it)
+                                    val checkedItemsMap = document.getData()?.get("checkedItems") as? Map<String, Boolean>
+                                    val imgId = document.id
+                                    val item = Item(it1, it2, it, checkedItemsMap?: emptyMap(), imgId)
                                     if (it2 == "Messy") {
                                         messyItems.add(item)
                                     } else {
@@ -319,6 +321,15 @@ class MainActivity : AppCompatActivity() {
                             intent.putExtra("classification", selectedItem.classification)
                             intent.putExtra("tag", selectedItem.tag)
                             intent.putExtra("date", selectedDate.toString())
+
+                            val checklistBundle = Bundle().apply {
+                                for ((key, value) in selectedItem.checkedItems) {
+                                    putBoolean(key, value)
+                                }
+                            }
+                            intent.putExtra("checklist", checklistBundle)
+                            intent.putExtra("imgId", selectedItem.imgId)
+
                             startActivity(intent)
                         }
 

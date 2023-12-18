@@ -263,6 +263,12 @@ class ImageDetailActivity : AppCompatActivity() {
                         val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
                         val formattedDate = formatter.format(date)
 
+                        val checklist = when (selectedTag) {
+                            "Office" -> getOfficeChecklist()
+                            "Kitchen" -> getKitchenChecklist()
+                            else -> getOtherChecklist()
+                        }.map { ChecklistItem(it, false) }
+
                         // Create a data object to be stored in Firestore
                         val data = hashMapOf(
                             "imageUrl" to imageUrl.toString(), // Replace imageUrl with the actual URL obtained
@@ -270,7 +276,9 @@ class ImageDetailActivity : AppCompatActivity() {
                             "classification" to classificationText,
                             "userId" to currentUserID,
                             "timestamp" to formattedDate,
-                            "tag" to selectedTag
+                            "tag" to selectedTag,
+                            "checkedItems" to checklist.associateBy({ it.text }, { it.isChecked }),
+                            "imgId" to pairUUID
                         )
 
                         // Save the data into Firestore
@@ -457,6 +465,36 @@ class ImageDetailActivity : AppCompatActivity() {
         }
 
         return byteBuffer
+    }
+
+    private fun getOfficeChecklist(): List<String> {
+        return listOf(
+            "Wipe surfaces regularly",
+            "Organize storage spaces",
+            "Dispose of trash regularly",
+            "Sweep and mop the floors",
+            "Check and refill office supplies"
+        )
+    }
+
+    private fun getKitchenChecklist(): List<String> {
+        return listOf(
+            "Wash dishes promptly",
+            "Wipe surfaces regularly",
+            "Organize storage spaces",
+            "Dispose of trash regularly",
+            "Sweep and mop the floors"
+        )
+    }
+
+    private fun getOtherChecklist(): List<String> {
+        return listOf(
+            "Wipe surfaces regularly",
+            "Organize storage spaces",
+            "Dispose of trash regularly",
+            "Sweep and mop the floors",
+            "Remove any trip hazards"
+        )
     }
 
 }
