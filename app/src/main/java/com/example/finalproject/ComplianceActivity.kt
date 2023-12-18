@@ -1,6 +1,5 @@
 package com.example.finalproject
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -12,8 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.example.finalproject.HistoryItem
-import org.w3c.dom.Text
 
 class ComplianceActivity : AppCompatActivity() {
 
@@ -117,15 +114,8 @@ class ComplianceActivity : AppCompatActivity() {
     }
     override fun onBackPressed() {
         super.onBackPressed()
-        // Create an intent to launch the MainActivity
         val intent = Intent(this, MainActivity::class.java)
-
-        // Add any necessary flags or extras to the intent (if needed)
-
-        // Start the MainActivity
         startActivity(intent)
-
-        // Finish the current activity to remove it from the back stack
         finish()
     }
 }

@@ -17,7 +17,6 @@ import android.view.animation.Animation
 import android.view.animation.LinearInterpolator
 import android.view.animation.TranslateAnimation
 import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -41,7 +40,6 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
     private val firestoreDB = FirebaseFirestore.getInstance()
     private lateinit var recyclerView: RecyclerView
-    private lateinit var buttonAdd: ImageButton
     private val CAMERA_PERMISSION_CODE = 100
     private val CAMERA_REQUEST_CODE = 101
     private val GALLERY_REQUEST_CODE = 102
@@ -54,9 +52,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var signOut: ImageButton
 
     private lateinit var fabButton: FloatingActionButton
-    private lateinit var imageView: ImageView
-    private lateinit var result: TextView
-    private val imageSize = 224
 
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firebaseStorage: FirebaseStorage
@@ -64,11 +59,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var firebaseDB: FirebaseFirestore
 
     private val calendarIcon = Calendar.getInstance()
-    //private val classification = intent.getStringExtra("classification")
     private var messyCount: Int=0
 
     private lateinit var date: TextView
-    private lateinit var currentUserID: String
 
     private var registration: ListenerRegistration? = null
     private var messyItems = mutableListOf<Item>()
@@ -101,8 +94,6 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.recycler)
         recyclerView.layoutManager = GridLayoutManager(this, 2)
-
-       // fetchImageUrlsFromFirestore()
 
         fabButton = findViewById(R.id.fabAdd)
 
@@ -175,9 +166,6 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
-//
-//            //TODO("Implement Historical Compliance View")
-//        }
 
         signOut.setOnClickListener {
             FirebaseAuth.getInstance().signOut()

@@ -8,14 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.finalproject.ChecklistItem
 import com.example.finalproject.R
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 
 class ChecklistAdapter(private val items: List<ChecklistItem>,private val checklistReference: DocumentReference) :
     RecyclerView.Adapter<ChecklistAdapter.ViewHolder>() {
 
-    private lateinit var firebaseDB: FirebaseFirestore
-    private lateinit var firebaseStorage: FirebaseStorage
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.checklist_fragment, parent, false)
@@ -57,11 +53,6 @@ class ChecklistAdapter(private val items: List<ChecklistItem>,private val checkl
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val checkbox: CheckBox = itemView.findViewById(R.id.todoCheckbox)
         val textView: TextView = itemView.findViewById(R.id.todoText)
-
-//        fun bind(item: String) {
-//            textView.text = item
-//            checkbox.isChecked = false
-//        }
     }
 }
 

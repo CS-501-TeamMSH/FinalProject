@@ -29,7 +29,6 @@
                 android:textColor="@android:color/white"
                 android:textSize="25sp" />
 
-
         </LinearLayout>
 
     </com.google.android.material.appbar.MaterialToolbar>
