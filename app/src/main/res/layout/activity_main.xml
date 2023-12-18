@@ -17,7 +17,7 @@
             app:layout_constraintStart_toStartOf="parent">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
@@ -26,8 +26,8 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
+                            android:orientation="vertical"
+                            android:layout_weight="1">
 
                                 <TextView
                                     android:id="@+id/maintitle"
@@ -35,7 +35,7 @@
                                     android:layout_height="wrap_content"
                                     android:text="@string/main_title"
                                     android:fontFamily="@font/ubuntu_bold"
-                                    android:textSize="25sp"
+                                    android:textSize="24sp"
                                     android:textColor="@android:color/white"/>
 
                                 <TextView
@@ -44,6 +44,8 @@
                                     android:layout_height="wrap_content"
                                     android:fontFamily="@font/ubuntu_regular"
                                     android:textSize="16sp"
+                                    android:textStyle="bold"
+                                    android:layout_marginTop="4dp"
                                     android:textColor="@android:color/white"/>
 
                                 <TextView
@@ -53,6 +55,7 @@
                                     android:text=""
                                     android:fontFamily="@font/ubuntu_regular"
                                     android:textSize="16sp"
+                                    android:layout_marginTop="4dp"
                                     android:textColor="@android:color/white"/>
 
 
@@ -62,7 +65,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:orientation="horizontal">
+                            android:orientation="horizontal"
+                            >
 
                         <ImageButton
                             android:id="@+id/calendarButton"
@@ -98,16 +102,31 @@
 
         </com.google.android.material.appbar.MaterialToolbar>
 
-        <TextView
-            android:id="@+id/noImageText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:paddingTop="18dp"
-            android:textSize="25sp"
-            app:layout_constraintTop_toBottomOf="@id/toolbar"
-            app:layout_constraintStart_toStartOf="parent"
-            android:textAlignment="center"/>
+
+
+
+                <TextView
+                    android:id="@+id/noImageText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:paddingTop="18dp"
+                    android:textSize="24sp"
+                    app:layout_constraintTop_toBottomOf="@id/toolbar"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:textAlignment="center"/>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginStart="25dp"
+                    android:layout_marginEnd="25dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabAdd"
@@ -122,17 +141,5 @@
             app:tint="@android:color/white"
             tools:ignore="SpeakableTextPresentCheck" />
 
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recycler"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="15dp"
-            android:layout_marginStart="25dp"
-            android:layout_marginEnd="25dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

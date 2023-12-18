@@ -112,6 +112,7 @@ class MainActivity : AppCompatActivity() {
             swipeListener.onTouchEvent(event)
         }
 
+
         // Fetch image URLs from Firebase Firestore
         fetchImageUrlsFromFirestore()
 
