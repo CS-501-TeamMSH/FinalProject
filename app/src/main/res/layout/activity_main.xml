@@ -8,78 +8,95 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-        <TextView
-            android:id="@+id/compliance"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="244dp"
-            android:layout_marginTop="16dp"
-            android:minHeight="48dp"
-            android:onClick="compliancr"
-            android:text="Compliance History"
-            android:textColor="#0000FF"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="128dp"
+            android:background="?attr/colorPrimary"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
 
-        <TextView
-            android:id="@+id/signOutButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:minHeight="48dp"
-            android:onClick="signOut"
-            android:text="Sign Out"
-            android:textColor="#0000FF"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginStart="16dp">
 
-        <TextView
-            android:id="@+id/dashtitle"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="40sp"
-            android:text=""
-            android:textAppearance="@font/ubuntu_bold"
-            android:textSize="28sp"
-            app:layout_constraintBottom_toTopOf="@id/date"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/signOutButton" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
-        <!-- Constraint to the calendar button -->
+                                <TextView
+                                    android:id="@+id/maintitle"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/main_title"
+                                    android:fontFamily="@font/ubuntu_bold"
+                                    android:textSize="25sp"
+                                    android:textColor="@android:color/white"/>
 
-        <TextView
-            android:id="@+id/date"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="18dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="12sp"
-            android:textAppearance="@font/ubuntu_bold"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toStartOf="@id/calendarButton"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/dashtitle" />
+                                <TextView
+                                    android:id="@+id/date"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="@font/ubuntu_regular"
+                                    android:textSize="16sp"
+                                    android:textColor="@android:color/white"/>
 
-        <ImageButton
-            android:id="@+id/calendarButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8sp"
-            android:layout_marginEnd="24dp"
-            android:background="?android:selectableItemBackground"
-            android:contentDescription="Calendar"
-            android:src="@drawable/baseline_calendar_month_24"
-            android:textSize="12sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/date"
-            tools:ignore="TouchTargetSizeCheck" />
+                                <TextView
+                                    android:id="@+id/dashtitle"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text=""
+                                    android:fontFamily="@font/ubuntu_regular"
+                                    android:textSize="16sp"
+                                    android:textColor="@android:color/white"/>
+
+
+
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:orientation="horizontal">
+
+                        <ImageButton
+                            android:id="@+id/calendarButton"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="?android:selectableItemBackground"
+                            android:contentDescription="Calendar"
+                            android:src="@drawable/baseline_calendar_month_w_24"
+                            android:textSize="12sp"
+                            tools:ignore="TouchTargetSizeCheck" />
+
+                        <ImageButton
+                            android:id="@+id/compliance"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="?android:selectableItemBackground"
+                            android:src="@drawable/baseline_history_w_24"
+                            android:contentDescription="Compliance history button"
+                            android:onClick="compliance"
+                            android:textSize="12sp" />
+                        <ImageButton
+                            android:id="@+id/signOutButton"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:background="?android:selectableItemBackground"
+                            android:contentDescription="Sign out button"
+                            android:src="@drawable/baseline_logout_w_24"
+                            android:onClick="signOut"
+                            android:textSize="12sp" />
+                </LinearLayout>
+
+                </LinearLayout>
+
+        </com.google.android.material.appbar.MaterialToolbar>
 
         <TextView
             android:id="@+id/noImageText"
@@ -88,7 +105,7 @@
             android:layout_marginTop="24dp"
             android:paddingTop="18dp"
             android:textSize="25sp"
-            app:layout_constraintTop_toBottomOf="@id/date"
+            app:layout_constraintTop_toBottomOf="@id/toolbar"
             app:layout_constraintStart_toStartOf="parent"
             android:textAlignment="center"/>
 
@@ -116,9 +133,6 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/calendarButton" />
-
-
-
+            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

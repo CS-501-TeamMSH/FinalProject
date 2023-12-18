@@ -12,4 +12,5 @@
     <string name="sign_out">Sign out</string>
     <string name="pick_photo">Pick Photo</string>
     <string name="take_picture">Take Picture</string>
+    <string name="main_title">Compliance Dashboard</string>
 </resources>

@@ -44,7 +44,6 @@ class ChecklistAdapter(private val items: List<ChecklistItem>,private val checkl
     }
 
     private fun updateFirebaseChecklistItem(text: String, isChecked: Boolean) {
-//        val checklistData = mapOf(text to isChecked)
         val checklistData = mapOf("checkedItems.$text" to isChecked)
         checklistReference.update(checklistData)
             .addOnSuccessListener {

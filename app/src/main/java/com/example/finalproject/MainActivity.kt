@@ -49,9 +49,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var calendar: ImageButton
     private lateinit var messyText: TextView
-    private lateinit var compliance: TextView
+    private lateinit var compliance: ImageButton
 
-    private lateinit var signOut: TextView
+    private lateinit var signOut: ImageButton
 
     private lateinit var fabButton: FloatingActionButton
     private lateinit var imageView: ImageView
@@ -155,7 +155,6 @@ class MainActivity : AppCompatActivity() {
                 calendarIcon.get(Calendar.MONTH),
                 calendarIcon.get(Calendar.DAY_OF_MONTH)
             )
-
 
 
             datePickerDialog.datePicker.maxDate = currentDate.timeInMillis
