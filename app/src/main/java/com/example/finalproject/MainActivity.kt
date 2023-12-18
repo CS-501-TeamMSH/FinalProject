@@ -29,6 +29,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.QueryDocumentSnapshot
 import com.google.firebase.storage.FirebaseStorage
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -67,6 +69,12 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var date: TextView
     private lateinit var currentUserID: String
+
+    private var registration: ListenerRegistration? = null
+    private var messyItems = mutableListOf<Item>()
+    private var cleanItems = mutableListOf<Item>()
+    private var mess = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -265,99 +273,111 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
     }
-
-    private fun fetchImageUrlsFromFirestore() {
-        var mess = 0
-        var messyItems = mutableListOf<Item>()
-        val selectedDate = date.text
-      //  Log.d("Date", selectedDate.toString())
-        var cleanItems = mutableListOf<Item>()
-        val noImageText = findViewById<TextView>(R.id.noImageText)
-        val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
-        currentUserID?.let { uid ->
-            firestoreDB.collection("images")
-                .whereEqualTo("userId", uid)
-                .whereEqualTo("timestamp", date.text.toString())
-                .get()
-                .addOnSuccessListener { result ->
-                    for (document in result) {
-                        val imageUrl = document.getString("imageUrl")
-                        val classification = document.getString("classification")?.let { capitalize(it) }
-                        if(classification == "Messy") {
-                            mess +=1
-                        }
-                        val tag = document.getString("tag")?.let { capitalize(it) }
-
-                        imageUrl?.let {
-                            noImageText.visibility = View.GONE
-                            tag?.let { it1 ->
-                                classification?.let { it2 ->
-                                    val checkedItemsMap = document.getData()?.get("checkedItems") as? Map<String, Boolean>
-                                    checkedItemsMap?.let { map ->
-                                        for ((item, isChecked) in map) {
-                                            Log.d("FeedbackActivity", "Checked Item: $item, isChecked: $isChecked")
-                                        }
-                                    }
-                                    val imgId = document.id
-                                    val item = Item(it1, it2, it, checkedItemsMap?: emptyMap(), imgId)
-                                    if (it2 == "Messy") {
-                                        messyItems.add(item)
-                                    } else {
-                                        cleanItems.add(item)
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (messyItems.isEmpty() && cleanItems.isEmpty()) {
-                        noImageText.text = "No Spaces Submitted"
-                        noImageText.visibility = View.VISIBLE
-                        recyclerView.visibility = View.GONE
-
-                    } else {
-                        val items = mutableListOf<Item>()
-                        items.addAll(messyItems)
-                        items.addAll(cleanItems)
-
-                        val adapter = ImageAdapter(items) { selectedItem ->
-                            val intent = Intent(this, FeedbackActivity::class.java)
-                            intent.putExtra("imgUrl", selectedItem.imageUrl)
-                            intent.putExtra("classification", selectedItem.classification)
-                            intent.putExtra("tag", selectedItem.tag)
-                            intent.putExtra("date", selectedDate.toString())
-                            selectedItem.checkedItems?.let { map ->
-                                for ((item, isChecked) in map) {
-                                    Log.d("FeedbackActivity", "Checked Item: $item, isChecked: $isChecked")
-                                }
-                            }
-                            val checklistBundle = Bundle().apply {
-                                for ((key, value) in selectedItem.checkedItems) {
-                                    putBoolean(key, value)
-                                }
-                            }
-                            intent.putExtra("checklist", checklistBundle)
-                            intent.putExtra("imgId", selectedItem.imgId)
-
-                            startActivity(intent)
-                        }
-
-                        recyclerView.visibility = View.VISIBLE
-                        recyclerView.adapter = adapter
-
-                    }
-                //    Log.d("String", mess.toString())
-                    messyText.text = "Non-Compliant Spaces: $mess"
-                    messyCount= mess
-                    //"Uncomment below function if you like the sliding UI"
-                   // startScrollingAnimation()
-
-                }
-                .addOnFailureListener { exception ->
-                    exception.printStackTrace()
-                }
+    private fun fetchChecklistFromFirestore(document: QueryDocumentSnapshot): Map<String, Boolean> {
+        val checkedItemsData = document.getData()?.get("checkedItems")
+        return if (checkedItemsData is Map<*, *>) {
+            checkedItemsData as Map<String, Boolean>
+        } else {
+            emptyMap()
         }
     }
+
+    private fun fetchImageUrlsFromFirestore() {
+        val selectedDate = date.text
+        val noImageText = findViewById<TextView>(R.id.noImageText)
+        val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
+
+        currentUserID?.let { uid ->
+            val query = firestoreDB.collection("images")
+                .whereEqualTo("userId", uid)
+                .whereEqualTo("timestamp", date.text.toString())
+
+            registration = query.addSnapshotListener { result, exception ->
+                if (exception != null) {
+                    exception.printStackTrace()
+                    return@addSnapshotListener
+                }
+
+                mess = 0
+                messyItems.clear()
+                cleanItems.clear()
+
+                for (document in result!!) {
+                    val imageUrl = document.getString("imageUrl")
+                    val classification = document.getString("classification")?.let { capitalize(it) }
+                    if (classification == "Messy") {
+                        mess += 1
+                    }
+                    val tag = document.getString("tag")?.let { capitalize(it) }
+
+                    imageUrl?.let {
+                        noImageText.visibility = View.GONE
+                        tag?.let { it1 ->
+                            classification?.let { it2 ->
+                                val checkedItemsMap = fetchChecklistFromFirestore(document)
+                                checkedItemsMap?.let { map ->
+                                    for ((item, isChecked) in map) {
+                                        Log.d("FeedbackActivity", "Checked Item: $item, isChecked: $isChecked")
+                                    }
+                                }
+                                val imgId = document.id
+                                val item = Item(it1, it2, it, checkedItemsMap ?: emptyMap(), imgId)
+                                if (it2 == "Messy") {
+                                    messyItems.add(item)
+                                } else {
+                                    cleanItems.add(item)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (messyItems.isEmpty() && cleanItems.isEmpty()) {
+                    noImageText.text = "No Spaces Submitted"
+                    noImageText.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
+                } else {
+                    val items = mutableListOf<Item>()
+                    items.addAll(messyItems)
+                    items.addAll(cleanItems)
+
+                    val adapter = ImageAdapter(items) { selectedItem ->
+                        val intent = Intent(this, FeedbackActivity::class.java)
+                        intent.putExtra("imgUrl", selectedItem.imageUrl)
+                        intent.putExtra("classification", selectedItem.classification)
+                        intent.putExtra("tag", selectedItem.tag)
+                        intent.putExtra("date", selectedDate.toString())
+                        selectedItem.checkedItems?.let { map ->
+                            for ((item, isChecked) in map) {
+                                Log.d("FeedbackActivity", "Checked Item: $item, isChecked: $isChecked")
+                            }
+                        }
+                        val checklistBundle = Bundle().apply {
+                            for ((key, value) in selectedItem.checkedItems) {
+                                putBoolean(key, value)
+                            }
+                        }
+                        intent.putExtra("checklist", checklistBundle)
+                        intent.putExtra("imgId", selectedItem.imgId)
+
+                        startActivity(intent)
+                    }
+
+                    recyclerView.visibility = View.VISIBLE
+                    recyclerView.adapter = adapter
+                }
+
+                messyText.text = "Non-Compliant Spaces: $mess"
+                messyCount = mess
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        registration?.remove()
+    }
+
     private fun startScrollingAnimation() {
         val messyText = findViewById<TextView>(R.id.dashtitle)
 
