@@ -13,4 +13,6 @@
     <string name="pick_photo">Pick Photo</string>
     <string name="take_picture">Take Picture</string>
     <string name="main_title">Compliance Dashboard</string>
+    <string name="add_dashboard">Add to dashboard</string>
+    <string name="back">Back</string>
 </resources>
