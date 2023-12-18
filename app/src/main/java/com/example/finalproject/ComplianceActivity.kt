@@ -40,7 +40,7 @@ class ComplianceActivity : AppCompatActivity() {
         backButton = findViewById(R.id.backButton)
         textView = findViewById(R.id.historyTitle)
 
-        messyTextView = findViewById(R.id.messyTotal)
+        //messyTextView = findViewById(R.id.messyTotal)
         // countView = findViewById(R.id.historyCount) // Add this line to reference the count TextView
 
         recyclerView = findViewById(R.id.historyRecycler)
@@ -78,7 +78,7 @@ class ComplianceActivity : AppCompatActivity() {
                         totalMessyCount += messyCount
                     }
 
-                    messyTextView.text = "Messy Total: $totalMessyCount"
+                    //messyTextView.text = "Messy Total: $totalMessyCount"
 
 
                     for ((date, messyCount) in historyMap) {
@@ -97,7 +97,7 @@ class ComplianceActivity : AppCompatActivity() {
                         }
                     }
 
-                    historyList.sortWith(compareByDescending<HistoryItem> { it.isMessy }.thenByDescending { it.date })
+                    historyList.sortWith(compareByDescending { it.date })
 
                     val adapter = ComplianceAdapter(historyList)
                     recyclerView.visibility = View.VISIBLE
