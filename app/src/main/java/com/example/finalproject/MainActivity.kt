@@ -293,6 +293,11 @@ class MainActivity : AppCompatActivity() {
                             tag?.let { it1 ->
                                 classification?.let { it2 ->
                                     val checkedItemsMap = document.getData()?.get("checkedItems") as? Map<String, Boolean>
+                                    checkedItemsMap?.let { map ->
+                                        for ((item, isChecked) in map) {
+                                            Log.d("FeedbackActivity", "Checked Item: $item, isChecked: $isChecked")
+                                        }
+                                    }
                                     val imgId = document.id
                                     val item = Item(it1, it2, it, checkedItemsMap?: emptyMap(), imgId)
                                     if (it2 == "Messy") {
@@ -321,7 +326,11 @@ class MainActivity : AppCompatActivity() {
                             intent.putExtra("classification", selectedItem.classification)
                             intent.putExtra("tag", selectedItem.tag)
                             intent.putExtra("date", selectedDate.toString())
-
+                            selectedItem.checkedItems?.let { map ->
+                                for ((item, isChecked) in map) {
+                                    Log.d("FeedbackActivity", "Checked Item: $item, isChecked: $isChecked")
+                                }
+                            }
                             val checklistBundle = Bundle().apply {
                                 for ((key, value) in selectedItem.checkedItems) {
                                     putBoolean(key, value)

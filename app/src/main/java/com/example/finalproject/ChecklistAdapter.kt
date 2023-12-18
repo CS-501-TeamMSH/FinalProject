@@ -19,6 +19,7 @@ class ChecklistAdapter(private val items: List<ChecklistItem>,private val checkl
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.checklist_fragment, parent, false)
+        Log.d("ChecklistAdapter", "Items in onCreateViewHolder: $items")
         return ViewHolder(view)
     }
 
@@ -30,6 +31,7 @@ class ChecklistAdapter(private val items: List<ChecklistItem>,private val checkl
         val currentItem = items[position]
         holder.textView.text = currentItem.text
         holder.checkbox.isChecked = currentItem.isChecked
+        Log.d("ChecklistAdapter", "Item: ${currentItem.text}, isChecked: ${currentItem.isChecked}")
 
         // Set a listener to handle checkbox state changes
         holder.checkbox.setOnCheckedChangeListener { _, isChecked ->

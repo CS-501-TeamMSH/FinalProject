@@ -58,6 +58,10 @@ class FeedbackActivity : AppCompatActivity() {
             result
         }
 
+        val checklistItems: List<ChecklistItem> = checklist?.map { entry ->
+            ChecklistItem(entry.key, entry.value)
+        } ?: emptyList()
+
         if (classification.equals("Messy")) {
             feedbackIcon.setImageResource(R.drawable.round_add_circle_24);
         } else {
@@ -82,22 +86,26 @@ class FeedbackActivity : AppCompatActivity() {
 //        initializeChecklistFromStorage(checklistReference)
 
 
+
         if (classification.equals("Messy")) {
 
+            Log.d("FeedbackAct", "Items in onCreateViewHolder: $checklistItems")
+            recyclerView.adapter = ChecklistAdapter(checklistItems, checklistReference)
+
             // Default Checklist depending on tag
-            when (tag) {
-                "Office" -> {
-                    updateChecklist(getOfficeChecklist(), checklistReference)
-                }
-
-                "Kitchen" -> {
-                    updateChecklist(getKitchenChecklist(), checklistReference)
-                }
-
-                else -> {
-                    updateChecklist(getOtherChecklist(), checklistReference)
-                }
-            }
+//            when (tag) {
+//                "Office" -> {
+//                    updateChecklist(getOfficeChecklist(), checklistReference)
+//                }
+//
+//                "Kitchen" -> {
+//                    updateChecklist(getKitchenChecklist(), checklistReference)
+//                }
+//
+//                else -> {
+//                    updateChecklist(getOtherChecklist(), checklistReference)
+//                }
+//            }
 
         } else {
 
