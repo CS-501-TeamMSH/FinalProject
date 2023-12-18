@@ -115,4 +115,17 @@ class ComplianceActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
+    override fun onBackPressed() {
+        super.onBackPressed()
+        // Create an intent to launch the MainActivity
+        val intent = Intent(this, MainActivity::class.java)
+
+        // Add any necessary flags or extras to the intent (if needed)
+
+        // Start the MainActivity
+        startActivity(intent)
+
+        // Finish the current activity to remove it from the back stack
+        finish()
+    }
 }
