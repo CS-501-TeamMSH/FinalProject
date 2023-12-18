@@ -1,4 +1,5 @@
 package com.example.finalproject
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,6 +32,16 @@ class ComplianceAdapter(private val historyList: List<HistoryItem>) :
             holder.statusIcon.setImageResource(R.drawable.baseline_error_24)
         } else {
             holder.statusIcon.setImageResource(R.drawable.baseline_check_circle_24)
+        }
+
+
+        holder.itemView.setOnClickListener {
+            val selectedDate = item.date
+            val context = holder.itemView.context
+            val intent = Intent(context, MainActivity::class.java)
+            intent.putExtra("date", selectedDate)
+          //  intent.putExtra("isMessy", true) // need to implement
+            context.startActivity(intent)
         }
     }
 

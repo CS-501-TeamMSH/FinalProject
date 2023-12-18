@@ -1,16 +1,21 @@
 package com.example.finalproject
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 class ComplianceActivity : AppCompatActivity() {
 
@@ -23,6 +28,8 @@ class ComplianceActivity : AppCompatActivity() {
     private lateinit var messyTextView: TextView
     private lateinit var cleanTextView: TextView
 
+    private lateinit var calendar: ImageButton
+    private val calendarIcon = Calendar.getInstance()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_compliance)
@@ -118,4 +125,7 @@ class ComplianceActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
+
+
 }

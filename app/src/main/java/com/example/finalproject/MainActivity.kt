@@ -158,8 +158,8 @@ class MainActivity : AppCompatActivity() {
 
         compliance.setOnClickListener {
             val intent = Intent(this, ComplianceActivity::class.java)
-            intent.putExtra("Count", messyCount.toString())
-            intent.putExtra("Date", date.text.toString())
+            intent.putExtra("count", messyCount.toString())
+            intent.putExtra("date", date.text.toString())
 
             Log.d("String", messyCount.toString())
             Log.d("String", date.text.toString())
