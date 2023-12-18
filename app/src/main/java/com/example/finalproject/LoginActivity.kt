@@ -17,7 +17,7 @@ import com.google.firebase.auth.GoogleAuthProvider
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var auth: FirebaseAuth;
+    private lateinit var auth: FirebaseAuth
     private lateinit var googleSignInClient: GoogleSignInClient
     private val RC_SIGN_IN = 123
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,9 +34,7 @@ class LoginActivity : AppCompatActivity() {
 
         // firebaseAuth = FirebaseAuth.getInstance()
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.web_client_id))
-            .requestEmail()
-            .build()
+            .requestIdToken(getString(R.string.web_client_id)).requestEmail().build()
 
         googleSignInClient = GoogleSignIn.getClient(this, gso)
 
@@ -58,8 +56,7 @@ class LoginActivity : AppCompatActivity() {
                     if (task.isSuccessful) {
                         // Sign in success, update UI with the signed-in user's information
                         Toast.makeText(
-                            this, "Authentication successful.",
-                            Toast.LENGTH_SHORT
+                            this, "Authentication successful.", Toast.LENGTH_SHORT
                         ).show()
                         val intent = Intent(this, MainActivity::class.java)
                         startActivity(intent) // Start the ImageDetailActivity
@@ -67,8 +64,7 @@ class LoginActivity : AppCompatActivity() {
                     } else {
                         // If sign in fails, display a message to the user.
                         Toast.makeText(
-                            this, "Authentication failed. Please try again.",
-                            Toast.LENGTH_SHORT
+                            this, "Authentication failed. Please try again.", Toast.LENGTH_SHORT
                         ).show()
                     }
                 }
@@ -78,8 +74,7 @@ class LoginActivity : AppCompatActivity() {
             val enteredPassword = editTextPassword.text.toString()
 
             // Check if the user already exists with the entered email
-            auth.fetchSignInMethodsForEmail(enteredUsername)
-                .addOnCompleteListener { fetchTask ->
+            auth.fetchSignInMethodsForEmail(enteredUsername).addOnCompleteListener { fetchTask ->
                     if (fetchTask.isSuccessful) {
                         val signInMethods = fetchTask.result?.signInMethods ?: emptyList<String>()
 
@@ -102,16 +97,15 @@ class LoginActivity : AppCompatActivity() {
                                                     if (auth.currentUser?.isEmailVerified == true) {
                                                         // Email verified, show success message
                                                         Toast.makeText(
-                                                            this, "Registration successful.",
+                                                            this,
+                                                            "Registration successful.",
                                                             Toast.LENGTH_SHORT
                                                         ).show()
 
                                                         // Log the user in after registration
                                                         auth.signInWithEmailAndPassword(
-                                                            enteredUsername,
-                                                            enteredPassword
-                                                        )
-                                                            .addOnCompleteListener { signInTask ->
+                                                            enteredUsername, enteredPassword
+                                                        ).addOnCompleteListener { signInTask ->
                                                                 if (signInTask.isSuccessful) {
                                                                     val intent = Intent(
                                                                         this,
@@ -134,14 +128,16 @@ class LoginActivity : AppCompatActivity() {
                                                     } else {
                                                         // Email not verified yet
                                                         Toast.makeText(
-                                                            this, "Please verify your email...",
+                                                            this,
+                                                            "Please verify your email...",
                                                             Toast.LENGTH_SHORT
                                                         ).show()
                                                     }
                                                 } else {
                                                     // Email verification sending failed
                                                     Toast.makeText(
-                                                        this, "Failed to send verification email.",
+                                                        this,
+                                                        "Failed to send verification email.",
                                                         Toast.LENGTH_SHORT
                                                     ).show()
                                                 }
@@ -149,7 +145,8 @@ class LoginActivity : AppCompatActivity() {
                                     } else {
                                         // Registration failed, display the error message from Firebase
                                         Toast.makeText(
-                                            this, "Registration failed: ${task.exception?.message}",
+                                            this,
+                                            "Registration failed: ${task.exception?.message}",
                                             Toast.LENGTH_SHORT
                                         ).show()
                                     }
@@ -157,7 +154,8 @@ class LoginActivity : AppCompatActivity() {
                         }
                     } else {
                         Toast.makeText(
-                            this, "Error checking user existence: ${fetchTask.exception?.message}",
+                            this,
+                            "Error checking user existence: ${fetchTask.exception?.message}",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
@@ -203,8 +201,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun firebaseAuthWithGoogle(idToken: String) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
+        auth.signInWithCredential(credential).addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     val user = auth.currentUser
                     val username = user?.displayName ?: ""

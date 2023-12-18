@@ -1,4 +1,10 @@
 package com.example.finalproject
 
-data class Item(val tag: String, val classification: String, val imageUrl: String, val checkedItems: Map<String, Boolean> = emptyMap(), val imgId: String)
+data class Item(
+    val tag: String,
+    val classification: String,
+    val imageUrl: String,
+    val checkedItems: Map<String, Boolean> = emptyMap(),
+    val imgId: String
+)
 

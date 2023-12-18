@@ -1,4 +1,5 @@
 package com.example.finalproject
+
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -12,13 +13,12 @@ class ComplianceAdapter(private val historyList: List<HistoryItem>) :
 
     inner class ComplianceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val date: TextView = itemView.findViewById(R.id.historyDate)
-        val messyCount: TextView = itemView.findViewById(R.id.historyCount)
         val statusIcon: ImageView = itemView.findViewById(R.id.statusIcon)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ComplianceViewHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.history_fragment, parent, false)
+        val view =
+            LayoutInflater.from(parent.context).inflate(R.layout.history_fragment, parent, false)
         return ComplianceViewHolder(view)
     }
 
@@ -40,7 +40,7 @@ class ComplianceAdapter(private val historyList: List<HistoryItem>) :
             val context = holder.itemView.context
             val intent = Intent(context, MainActivity::class.java)
             intent.putExtra("date", selectedDate)
-          //  intent.putExtra("isMessy", true) // need to implement
+            //  intent.putExtra("isMessy", true) // need to implement
             context.startActivity(intent)
         }
     }

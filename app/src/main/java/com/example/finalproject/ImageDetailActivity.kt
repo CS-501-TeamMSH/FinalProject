@@ -61,9 +61,9 @@ class ImageDetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_image_detail)
 
-        camera = findViewById<ImageView>(R.id.button)
-        gallery = findViewById<ImageView>(R.id.button2)
-        back = findViewById<Button>(R.id.backButton)
+        camera = findViewById(R.id.button)
+        gallery = findViewById(R.id.button2)
+        back = findViewById(R.id.backButton)
 
         result = findViewById(R.id.result)
         imageView = findViewById(R.id.imageView)
@@ -122,7 +122,7 @@ class ImageDetailActivity : AppCompatActivity() {
 
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Select Tag")
-        builder.setItems(tags) { dialog, which ->
+        builder.setItems(tags) { _, which ->
             val selectedTag = tags[which]
             Toast.makeText(this, selectedTag, Toast.LENGTH_SHORT).show()
             // Store the bitmap image and the classification text with the selected tag
@@ -137,8 +137,7 @@ class ImageDetailActivity : AppCompatActivity() {
         val storageRef = firebaseStorage.reference
         val imagesRef = storageRef.child("images")
 
-        imagesRef.listAll()
-            .addOnSuccessListener { listResult ->
+        imagesRef.listAll().addOnSuccessListener { listResult ->
                 for (item in listResult.items) {
                     // Get the full name of the image (with extension) and extract the UUID part
                     val fullName = item.name
@@ -148,8 +147,7 @@ class ImageDetailActivity : AppCompatActivity() {
                         savedImageAndTextSet.add(uuid)
                     }
                 }
-            }
-            .addOnFailureListener { e ->
+            }.addOnFailureListener { e ->
                 Log.e("ImageDetailActivity", "Failed to retrieve image UUIDs: ${e.message}")
             }
     }
@@ -158,25 +156,20 @@ class ImageDetailActivity : AppCompatActivity() {
         val storageRef = firebaseStorage.reference
         val imagesRef = storageRef.child("images")
 
-        imagesRef.listAll()
-            .addOnSuccessListener { listResult ->
+        imagesRef.listAll().addOnSuccessListener { listResult ->
                 for (item in listResult.items) {
                     // Fetch the image bytes
-                    item.getBytes(Long.MAX_VALUE)
-                        .addOnSuccessListener { bytes ->
+                    item.getBytes(Long.MAX_VALUE).addOnSuccessListener { bytes ->
                             // Calculate the hash of the image data
                             val imageHash = calculateHash(bytes)
                             savedImageHashes.add(imageHash)
-                        }
-                        .addOnFailureListener { e ->
+                        }.addOnFailureListener { e ->
                             Log.e(
-                                "ImageDetailActivity",
-                                "Failed to fetch image bytes: ${e.message}"
+                                "ImageDetailActivity", "Failed to fetch image bytes: ${e.message}"
                             )
                         }
                 }
-            }
-            .addOnFailureListener { e ->
+            }.addOnFailureListener { e ->
                 Log.e("ImageDetailActivity", "Failed to retrieve image list: ${e.message}")
             }
     }
@@ -191,9 +184,7 @@ class ImageDetailActivity : AppCompatActivity() {
 
 
     private fun preventFirebaseDuplicates(
-        bitmap: Bitmap,
-        classificationText: String,
-        selectedTag: String
+        bitmap: Bitmap, classificationText: String, selectedTag: String
     ) {
         loadExistingImageUUIDs()
         loadExistingImageHashes()
@@ -218,9 +209,7 @@ class ImageDetailActivity : AppCompatActivity() {
 
     // Add an additional parameter imageUUID for the image UUID
     private fun storeImageAndClassification(
-        bitmap: Bitmap,
-        classificationText: String,
-        selectedTag: String
+        bitmap: Bitmap, classificationText: String, selectedTag: String
     ) {
         //  binding.progressBar.visibility = View.VISIBLE
         val storageRef = firebaseStorage.reference
@@ -237,7 +226,7 @@ class ImageDetailActivity : AppCompatActivity() {
 
         // Store the image in Firebase Storage
         val uploadImageTask = imagesRef.putBytes(imageData)
-        uploadImageTask.addOnSuccessListener { imageUploadTask ->
+        uploadImageTask.addOnSuccessListener { _ ->
             imagesRef.downloadUrl.addOnSuccessListener { imageUrl ->
                 Log.d(
                     "ImageDetailActivity",
@@ -247,7 +236,7 @@ class ImageDetailActivity : AppCompatActivity() {
                 // Store the classification text in Firebase Storage
                 val textBytes = classificationText.toByteArray()
                 val uploadTextTask = textRef.putBytes(textBytes)
-                uploadTextTask.addOnSuccessListener { textUploadTask ->
+                uploadTextTask.addOnSuccessListener { _ ->
                     textRef.downloadUrl.addOnSuccessListener { textUrl ->
                         Log.d(
                             "ImageDetailActivity",
@@ -282,21 +271,18 @@ class ImageDetailActivity : AppCompatActivity() {
                         )
 
                         // Save the data into Firestore
-                        docRef.set(data)
-                            .addOnSuccessListener {
+                        docRef.set(data).addOnSuccessListener {
                                 Toast.makeText(this, "Uploaded to Dashboard!", Toast.LENGTH_SHORT)
                                     .show()
                                 Log.d(
                                     "ImageDetailActivity",
                                     "Image data saved successfully to Firestore"
                                 )
-                            }
-                            .addOnFailureListener { e ->
+                            }.addOnFailureListener { e ->
                                 Toast.makeText(this, "Error: ${e.message}", Toast.LENGTH_SHORT)
                                     .show()
                                 Log.e(
-                                    "ImageDetailActivity",
-                                    "Error saving image data: ${e.message}"
+                                    "ImageDetailActivity", "Error saving image data: ${e.message}"
                                 )
                             }
                     }.addOnFailureListener { textUrlFailure ->
@@ -323,17 +309,13 @@ class ImageDetailActivity : AppCompatActivity() {
                 }
             }.addOnFailureListener { imageUrlFailure ->
                 Toast.makeText(
-                    this,
-                    "Error getting image URL: ${imageUrlFailure.message}",
-                    Toast.LENGTH_SHORT
+                    this, "Error getting image URL: ${imageUrlFailure.message}", Toast.LENGTH_SHORT
                 ).show()
                 Log.e("ImageDetailActivity", "Failed to get image URL: ${imageUrlFailure.message}")
             }
         }.addOnFailureListener { imageUploadFailure ->
             Toast.makeText(
-                this,
-                "Error uploading image: ${imageUploadFailure.message}",
-                Toast.LENGTH_SHORT
+                this, "Error uploading image: ${imageUploadFailure.message}", Toast.LENGTH_SHORT
             ).show()
             Log.e("ImageDetailActivity", "Error uploading image: ${imageUploadFailure.message}")
         }
@@ -388,7 +370,8 @@ class ImageDetailActivity : AppCompatActivity() {
         val bytes = ByteBuffer.allocate(inImage.byteCount)
         inImage.copyPixelsToBuffer(bytes)
         val path = MediaStore.Images.Media.insertImage(
-            contentResolver, inImage, "Title", null)
+            contentResolver, inImage, "Title", null
+        )
         return Uri.parse(path)
     }
 
@@ -434,8 +417,7 @@ class ImageDetailActivity : AppCompatActivity() {
             }
 
             // Format and display the result
-            val resultText =
-                "$predictedClassLabel"   // Predicted Premium: $predictedPremiumLabel"
+            val resultText = "$predictedClassLabel"   // Predicted Premium: $predictedPremiumLabel"
             result.text = Html.fromHtml(resultText, Html.FROM_HTML_MODE_COMPACT)
             result.gravity = Gravity.CENTER
         } else {

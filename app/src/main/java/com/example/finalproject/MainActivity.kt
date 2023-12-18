@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var firebaseDB: FirebaseFirestore
 
     private val calendarIcon = Calendar.getInstance()
-    private var messyCount: Int=0
+    private var messyCount: Int = 0
 
     private lateinit var date: TextView
 
@@ -72,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        date = findViewById<TextView>(R.id.date)
+        date = findViewById(R.id.date)
 
         val today = Date()
         val dateFormat = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
@@ -132,9 +132,11 @@ class MainActivity : AppCompatActivity() {
                     calendarIcon.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
 
-                    val selectedDate = SimpleDateFormat("MM/dd/yyyy", Locale.getDefault())
-                        .format(calendarIcon.time)
-                  //  Toast.makeText(this, "Selected Date: $selectedDate", Toast.LENGTH_SHORT).show()
+                    val selectedDate = SimpleDateFormat(
+                        "MM/dd/yyyy",
+                        Locale.getDefault()
+                    ).format(calendarIcon.time)
+                    //  Toast.makeText(this, "Selected Date: $selectedDate", Toast.LENGTH_SHORT).show()
                     date.text = selectedDate
                     //Log.d("Main", messyCount.toString())
                     Log.d("String", selectedDate)
@@ -181,7 +183,7 @@ class MainActivity : AppCompatActivity() {
     private fun showPictureDialog() {
         val pictureDialog = AlertDialog.Builder(this)
         val pictureDialogItems = arrayOf("Photo Gallery", "Take Picture")
-        pictureDialog.setItems(pictureDialogItems) { dialog, which ->
+        pictureDialog.setItems(pictureDialogItems) { _, which ->
             when (which) {
                 0 -> choosePhotoFromGallery()
                 1 -> takePhotoFromCamera()
@@ -197,14 +199,11 @@ class MainActivity : AppCompatActivity() {
     private fun takePhotoFromCamera() {
         // Check camera permission
         if (ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.CAMERA
+                this, Manifest.permission.CAMERA
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             ActivityCompat.requestPermissions(
-                this,
-                arrayOf(Manifest.permission.CAMERA),
-                CAMERA_PERMISSION_CODE
+                this, arrayOf(Manifest.permission.CAMERA), CAMERA_PERMISSION_CODE
 
             )
             val intent = Intent(this, ImageDetailActivity::class.java)
@@ -261,8 +260,9 @@ class MainActivity : AppCompatActivity() {
             e.printStackTrace()
         }
     }
+
     private fun fetchChecklistFromFirestore(document: QueryDocumentSnapshot): Map<String, Boolean> {
-        val checkedItemsData = document.getData()?.get("checkedItems")
+        val checkedItemsData = document.data["checkedItems"]
         return if (checkedItemsData is Map<*, *>) {
             checkedItemsData as Map<String, Boolean>
         } else {
@@ -276,8 +276,7 @@ class MainActivity : AppCompatActivity() {
         val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
 
         currentUserID?.let { uid ->
-            val query = firestoreDB.collection("images")
-                .whereEqualTo("userId", uid)
+            val query = firestoreDB.collection("images").whereEqualTo("userId", uid)
                 .whereEqualTo("timestamp", date.text.toString())
 
             registration = query.addSnapshotListener { result, exception ->
@@ -292,7 +291,8 @@ class MainActivity : AppCompatActivity() {
 
                 for (document in result!!) {
                     val imageUrl = document.getString("imageUrl")
-                    val classification = document.getString("classification")?.let { capitalize(it) }
+                    val classification =
+                        document.getString("classification")?.let { capitalize(it) }
                     if (classification == "Messy") {
                         mess += 1
                     }
@@ -303,13 +303,16 @@ class MainActivity : AppCompatActivity() {
                         tag?.let { it1 ->
                             classification?.let { it2 ->
                                 val checkedItemsMap = fetchChecklistFromFirestore(document)
-                                checkedItemsMap?.let { map ->
+                                checkedItemsMap.let { map ->
                                     for ((item, isChecked) in map) {
-                                        Log.d("FeedbackActivity", "Checked Item: $item, isChecked: $isChecked")
+                                        Log.d(
+                                            "FeedbackActivity",
+                                            "Checked Item: $item, isChecked: $isChecked"
+                                        )
                                     }
                                 }
                                 val imgId = document.id
-                                val item = Item(it1, it2, it, checkedItemsMap ?: emptyMap(), imgId)
+                                val item = Item(it1, it2, it, checkedItemsMap, imgId)
                                 if (it2 == "Messy") {
                                     messyItems.add(item)
                                 } else {
@@ -321,7 +324,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 if (messyItems.isEmpty() && cleanItems.isEmpty()) {
-                    noImageText.text = "No Spaces Submitted"
+                    noImageText.text = getString(R.string.no_image)
                     noImageText.visibility = View.VISIBLE
                     recyclerView.visibility = View.GONE
                 } else {
@@ -335,9 +338,11 @@ class MainActivity : AppCompatActivity() {
                         intent.putExtra("classification", selectedItem.classification)
                         intent.putExtra("tag", selectedItem.tag)
                         intent.putExtra("date", selectedDate.toString())
-                        selectedItem.checkedItems?.let { map ->
+                        selectedItem.checkedItems.let { map ->
                             for ((item, isChecked) in map) {
-                                Log.d("FeedbackActivity", "Checked Item: $item, isChecked: $isChecked")
+                                Log.d(
+                                    "FeedbackActivity", "Checked Item: $item, isChecked: $isChecked"
+                                )
                             }
                         }
                         val checklistBundle = Bundle().apply {
@@ -355,7 +360,7 @@ class MainActivity : AppCompatActivity() {
                     recyclerView.adapter = adapter
                 }
 
-                messyText.text = "Non-Compliant Spaces: $mess"
+                messyText.text = getString(R.string.non_compliant_spaces, mess)
                 messyCount = mess
             }
         }
@@ -391,7 +396,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    fun capitalize(str: String): String {
+    private fun capitalize(str: String): String {
         return str.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
     }
 
@@ -402,18 +407,15 @@ class MainActivity : AppCompatActivity() {
         private val SWIPE_VELOCITY_THRESHOLD = 100
 
         override fun onFling(
-            e1: MotionEvent?,
-            e2: MotionEvent,
-            velocityX: Float,
-            velocityY: Float
+            e1: MotionEvent?, e2: MotionEvent, velocityX: Float, velocityY: Float
         ): Boolean {
 
             val diffX = e2.x - (e1?.x ?: 0f)
             val diffY = e2.y - (e1?.y ?: 0f)
 
-            if (kotlin.math.abs(diffX) > kotlin.math.abs(diffY) &&
-                kotlin.math.abs(diffX) > SWIPE_THRESHOLD &&
-                kotlin.math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD
+            if (kotlin.math.abs(diffX) > kotlin.math.abs(diffY) && kotlin.math.abs(diffX) > SWIPE_THRESHOLD && kotlin.math.abs(
+                    velocityX
+                ) > SWIPE_VELOCITY_THRESHOLD
             ) {
                 if (diffX > 0) {
                     // Swiped right

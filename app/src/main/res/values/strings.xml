@@ -15,4 +15,6 @@
     <string name="main_title">Compliance Dashboard</string>
     <string name="add_dashboard">Add to dashboard</string>
     <string name="back">Back</string>
+    <string name="no_image">No Spaces Submitted</string>
+    <string name="non_compliant_spaces">Non-Compliant Spaces: %1$d</string>
 </resources>

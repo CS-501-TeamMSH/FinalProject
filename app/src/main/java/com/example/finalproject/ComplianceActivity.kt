@@ -1,21 +1,17 @@
 package com.example.finalproject
 
-import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.ImageButton
 import android.widget.TextView
+import androidx.activity.addCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 class ComplianceActivity : AppCompatActivity() {
 
@@ -23,13 +19,6 @@ class ComplianceActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var backButton: Button
     private lateinit var textView: TextView
-    private lateinit var countView: TextView
-
-    private lateinit var messyTextView: TextView
-    private lateinit var cleanTextView: TextView
-
-    private lateinit var calendar: ImageButton
-    private val calendarIcon = Calendar.getInstance()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_compliance)
@@ -44,9 +33,6 @@ class ComplianceActivity : AppCompatActivity() {
         backButton = findViewById(R.id.backButton)
         textView = findViewById(R.id.historyTitle)
 
-        //messyTextView = findViewById(R.id.messyTotal)
-        // countView = findViewById(R.id.historyCount) // Add this line to reference the count TextView
-
         recyclerView = findViewById(R.id.historyRecycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
@@ -54,9 +40,7 @@ class ComplianceActivity : AppCompatActivity() {
         val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
 
         currentUserID?.let { uid ->
-            firestoreDB.collection("images")
-                .whereEqualTo("userId", uid)
-                .get()
+            firestoreDB.collection("images").whereEqualTo("userId", uid).get()
                 .addOnSuccessListener { result ->
                     val historyMap = mutableMapOf<String, Int>()
                     val historyMapClean = mutableMapOf<String, Int>()
@@ -76,7 +60,6 @@ class ComplianceActivity : AppCompatActivity() {
                     }
 
                     var totalMessyCount = 0
-                    var totalCleanCount = 0
 
                     for ((_, messyCount) in historyMap) {
                         totalMessyCount += messyCount
@@ -118,14 +101,13 @@ class ComplianceActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
-    }
-    override fun onBackPressed() {
-        super.onBackPressed()
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
 
+        onBackPressedDispatcher.addCallback(this) {
+            val intent = Intent(this@ComplianceActivity, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+    }
 
 
 }

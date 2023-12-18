@@ -34,8 +34,7 @@ class ImageAdapter(private val items: List<Item>, private val onItemClick: (Item
 
         } else {
             val drawable = ContextCompat.getDrawable(
-                holder.itemView.context,
-                R.drawable.baseline_check_circle_24
+                holder.itemView.context, R.drawable.baseline_check_circle_24
             )
             holder.icon.setImageDrawable(drawable)
         }
