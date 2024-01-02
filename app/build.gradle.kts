@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.finalproject"
+    namespace = "com.smh.finalproject"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.finalproject"
+        applicationId = "com.smh.finalproject"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -17,6 +17,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+
 
     buildTypes {
         release {
@@ -37,6 +38,7 @@ android {
     buildFeatures {
         mlModelBinding = true
     }
+
 }
 
 dependencies {
