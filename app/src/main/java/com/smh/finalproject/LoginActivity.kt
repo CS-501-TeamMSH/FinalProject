@@ -29,20 +29,20 @@ class LoginActivity : AppCompatActivity() {
         val buttonLogin = findViewById<Button>(R.id.loginButton)
         val buttonRegister =
             findViewById<Button>(R.id.registerButton) // Add the Register button in your layout XML
-        val buttonGoogle = findViewById<MaterialButton>(R.id.googleButton)
+      //  val buttonGoogle = findViewById<MaterialButton>(R.id.googleButton)
         auth = FirebaseAuth.getInstance()
 
-        // firebaseAuth = FirebaseAuth.getInstance()
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.web_client_id)).requestEmail().build()
-
-        googleSignInClient = GoogleSignIn.getClient(this, gso)
-
-        // Set click listener for the Google Sign-In button
-        buttonGoogle.setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            startActivityForResult(signInIntent, RC_SIGN_IN)
-        }
+//        // firebaseAuth = FirebaseAuth.getInstance()
+//        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+//            .requestIdToken(getString(R.string.web_client_id)).requestEmail().build()
+//
+//        googleSignInClient = GoogleSignIn.getClient(this, gso)
+//
+//        // Set click listener for the Google Sign-In button
+//        buttonGoogle.setOnClickListener {
+//            val signInIntent = googleSignInClient.signInIntent
+//            startActivityForResult(signInIntent, RC_SIGN_IN)
+//        }
 
 
         buttonLogin.setOnClickListener {

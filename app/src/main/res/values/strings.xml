@@ -1,7 +1,8 @@
 <resources>
-    <string name="app_name">FinalProject</string>
+    <string name="app_name">S.M.H</string>
     <string name="web_client_id"> 86814511792-q8e7p4bid333jb7tnvo3dimqrc4d91fo.apps.googleusercontent.com </string>
-    <string name="inspectisafe">InspectiSafe</string>
+    <string name="inspectisafe">S.M.H</string>
+    <string name="inspectisafe2">Scan.My.Haven </string>
     <string name="username">username</string>
     <string name="password">password</string>
     <string name="login">Login</string>

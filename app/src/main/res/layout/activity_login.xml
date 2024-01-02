@@ -23,7 +23,7 @@
         android:id="@+id/welcomeMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/inspectisafe"
+        android:text="@string/inspectisafe2"
         android:textColor="@color/md_theme_onBackground"
         android:textSize="20sp"
         android:fontFamily="@font/ubuntu_medium"
@@ -32,6 +32,7 @@
         app:layout_constraintTop_toBottomOf="@+id/logoImageView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout"
@@ -120,24 +121,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/loginButton" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/googleButton"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
-        android:fontFamily="@font/ubuntu_bold"
-        android:text="Sign in with Google"
-        android:elevation="1dp"
-        android:stateListAnimator="@null"
-        android:backgroundTint="@color/md_theme_background"
-        android:textColor="@color/md_theme_onBackground"
-        android:drawableLeft="@drawable/google_logo"
-        android:textSize="16sp"
-        app:cornerRadius="9dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/registerButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
