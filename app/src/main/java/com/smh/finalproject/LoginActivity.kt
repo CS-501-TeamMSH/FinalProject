@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -29,6 +30,8 @@ class LoginActivity : AppCompatActivity() {
         val buttonLogin = findViewById<Button>(R.id.loginButton)
         val buttonRegister =
             findViewById<Button>(R.id.registerButton) // Add the Register button in your layout XML
+
+
       //  val buttonGoogle = findViewById<MaterialButton>(R.id.googleButton)
         auth = FirebaseAuth.getInstance()
 
@@ -171,16 +174,24 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun updateUI(currentUser: FirebaseUser?) {
-        // You can update the UI based on the currentUser object
-        // For example, enable/disable certain buttons, show user information, etc.
         if (currentUser != null) {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
             finish()
         } else {
-            // Handle UI update if the user is not signed in
-            Toast.makeText(this, "Please sign in", Toast.LENGTH_SHORT).show()
+            showSignInOrRegisterDialog()
         }
+    }
+
+    private fun showSignInOrRegisterDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Sign In Required")
+        builder.setMessage("Please sign in or register today using a valid email!")
+        builder.setPositiveButton("Cancel") { dialog, which ->
+            dialog.dismiss()
+        }
+        val dialog = builder.create()
+        dialog.show()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
