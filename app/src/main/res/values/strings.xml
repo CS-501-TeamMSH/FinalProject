@@ -4,9 +4,11 @@
     <string name="inspectisafe">S.M.H</string>
     <string name="inspectisafe2">Scan.My.Haven </string>
     <string name="username">email</string>
+    <string name="name">first name</string>
     <string name="password">password</string>
     <string name="login">Login</string>
-    <string name="register">Register</string>
+    <string name="register">Don\'t have an account? Register Today!</string>
+
     <string name="dashboard">Dashboard</string>
     <string name="save_image">Save Image</string>
     <string name="retrieve_image">Retrieve Image</string>
@@ -18,6 +20,6 @@
     <string name="back">Back</string>
     <string name="no_image">No Spaces Submitted</string>
     <string name="non_compliant_spaces">Non-Compliant Spaces: %1$d</string>
-    <string name="register_hyperlink"><![CDATA[Register <a href="https://your_registration_link_here">here</a>]]></string>
+
 
 </resources>

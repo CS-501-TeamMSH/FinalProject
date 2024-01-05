@@ -20,12 +20,17 @@
         android:theme="@style/Base.Theme.FinalProject"
         tools:targetApi="31">
         <activity
+            android:name=".MainDisplayActivity"
+            android:exported="false" >
+
+        </activity>
+
+        <activity
             android:name=".ComplianceActivity"
             android:exported="false" />
         <activity
             android:name=".Profile"
-            android:exported="false" />
-        <!-- LoginActivity is the launcher -->
+            android:exported="false" /> <!-- LoginActivity is the launcher -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -34,18 +39,15 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <!-- ImageDetailActivity -->
+        </activity> <!-- ImageDetailActivity -->
         <activity
             android:name=".ImageDetailActivity"
             android:exported="true"
-            android:screenOrientation="portrait" />
-        <!-- MainActivity -->
+            android:screenOrientation="portrait" /> <!-- MainActivity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:screenOrientation="portrait"/>
-        <!-- FeedbackActivity -->
+            android:screenOrientation="portrait" /> <!-- FeedbackActivity -->
         <activity
             android:name=".FeedbackActivity"
             android:exported="true"

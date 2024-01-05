@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -28,26 +29,11 @@ class LoginActivity : AppCompatActivity() {
         val editTextUsername = findViewById<EditText>(R.id.editTextUsername)
         val editTextPassword = findViewById<EditText>(R.id.editTextPassword)
         val buttonLogin = findViewById<Button>(R.id.loginButton)
-        val buttonRegister =
-            findViewById<Button>(R.id.registerButton) // Add the Register button in your layout XML
+        val buttonRegister = findViewById<TextView>(R.id.registerTextView) // Add the Register button in your layout XML
 
 
-      //  val buttonGoogle = findViewById<MaterialButton>(R.id.googleButton)
+        //  val buttonGoogle = findViewById<MaterialButton>(R.id.googleButton)
         auth = FirebaseAuth.getInstance()
-
-//        // firebaseAuth = FirebaseAuth.getInstance()
-//        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//            .requestIdToken(getString(R.string.web_client_id)).requestEmail().build()
-//
-//        googleSignInClient = GoogleSignIn.getClient(this, gso)
-//
-//        // Set click listener for the Google Sign-In button
-//        buttonGoogle.setOnClickListener {
-//            val signInIntent = googleSignInClient.signInIntent
-//            startActivityForResult(signInIntent, RC_SIGN_IN)
-//        }
-
-
         buttonLogin.setOnClickListener {
             val enteredUsername = editTextUsername.text.toString()
             val enteredPassword = editTextPassword.text.toString()
@@ -73,96 +59,11 @@ class LoginActivity : AppCompatActivity() {
                 }
         }
         buttonRegister.setOnClickListener {
-            val enteredUsername = editTextUsername.text.toString()
-            val enteredPassword = editTextPassword.text.toString()
+//
 
-            // Check if the user already exists with the entered email
-            auth.fetchSignInMethodsForEmail(enteredUsername).addOnCompleteListener { fetchTask ->
-                    if (fetchTask.isSuccessful) {
-                        val signInMethods = fetchTask.result?.signInMethods ?: emptyList<String>()
-
-                        if (signInMethods.isNotEmpty()) {
-                            // User already exists with the entered email, show error message
-                            Toast.makeText(
-                                this,
-                                "User with this email already exists. Please use a different email.",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        } else {
-                            // User does not exist, proceed with registration
-                            auth.createUserWithEmailAndPassword(enteredUsername, enteredPassword)
-                                .addOnCompleteListener(this) { task ->
-                                    if (task.isSuccessful) {
-                                        auth.currentUser?.sendEmailVerification()
-                                            ?.addOnCompleteListener { emailVerificationTask ->
-                                                if (emailVerificationTask.isSuccessful) {
-                                                    // Check if the email is verified
-                                                    if (auth.currentUser?.isEmailVerified == true) {
-                                                        // Email verified, show success message
-                                                        Toast.makeText(
-                                                            this,
-                                                            "Registration successful.",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-
-                                                        // Log the user in after registration
-                                                        auth.signInWithEmailAndPassword(
-                                                            enteredUsername, enteredPassword
-                                                        ).addOnCompleteListener { signInTask ->
-                                                                if (signInTask.isSuccessful) {
-                                                                    val intent = Intent(
-                                                                        this,
-                                                                        MainActivity::class.java
-                                                                    )
-                                                                    intent.putExtra(
-                                                                        "USERNAME_EXTRA",
-                                                                        enteredUsername
-                                                                    )
-                                                                    startActivity(intent)
-                                                                    finish()
-                                                                } else {
-                                                                    Toast.makeText(
-                                                                        this,
-                                                                        "Sign-in after registration failed.",
-                                                                        Toast.LENGTH_SHORT
-                                                                    ).show()
-                                                                }
-                                                            }
-                                                    } else {
-                                                        // Email not verified yet
-                                                        Toast.makeText(
-                                                            this,
-                                                            "Please verify your email...",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                    }
-                                                } else {
-                                                    // Email verification sending failed
-                                                    Toast.makeText(
-                                                        this,
-                                                        "Failed to send verification email.",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                }
-                                            }
-                                    } else {
-                                        // Registration failed, display the error message from Firebase
-                                        Toast.makeText(
-                                            this,
-                                            "Registration failed: ${task.exception?.message}",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
-                                }
-                        }
-                    } else {
-                        Toast.makeText(
-                            this,
-                            "Error checking user existence: ${fetchTask.exception?.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                }
+            val intent = Intent(this, MainDisplayActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
 
@@ -179,7 +80,8 @@ class LoginActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         } else {
-            showSignInOrRegisterDialog()
+           // showSignInOrRegisterDialog()
+            Toast.makeText(this, "Please Sign In", Toast.LENGTH_SHORT).show()
         }
     }
 
