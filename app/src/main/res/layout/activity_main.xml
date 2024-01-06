@@ -31,12 +31,12 @@
 
                                 <TextView
                                     android:id="@+id/maintitle"
-                                    android:layout_width="wrap_content"
+                                    android:layout_width="206dp"
                                     android:layout_height="wrap_content"
-                                    android:text="@string/main_title"
                                     android:fontFamily="@font/ubuntu_bold"
-                                    android:textSize="24sp"
-                                    android:textColor="@android:color/white"/>
+                                    android:text="@string/main_title"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="24sp" />
 
                                 <TextView
                                     android:id="@+id/date"
@@ -186,6 +186,15 @@
             tools:ignore="SpeakableTextPresentCheck" />
 
 
+        <ImageButton
+            android:id="@+id/btnClose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="16dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

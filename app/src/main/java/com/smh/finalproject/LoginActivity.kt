@@ -76,7 +76,7 @@ class LoginActivity : AppCompatActivity() {
 
     private fun updateUI(currentUser: FirebaseUser?) {
         if (currentUser != null) {
-            val intent = Intent(this, MainActivity::class.java)
+            val intent = Intent(this, VideoView::class.java)
             startActivity(intent)
             finish()
         } else {
@@ -96,48 +96,7 @@ class LoginActivity : AppCompatActivity() {
         dialog.show()
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == RC_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
-            try {
-                // Google Sign-In was successful, authenticate with Firebase
-                val account = task.getResult(ApiException::class.java)!!
-                firebaseAuthWithGoogle(account.idToken!!)
-            } catch (e: ApiException) {
-                // Google Sign-In failed
-                Toast.makeText(this, "Google Sign-In Failed", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential).addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    val user = auth.currentUser
-                    val username = user?.displayName ?: ""
-                    Toast.makeText(this, "Google Login Successful", Toast.LENGTH_SHORT).show()
 
 
-                    val sharedPreferences = getSharedPreferences("user", MODE_PRIVATE)
-                    val editor = sharedPreferences.edit()
-                    editor.putString("Username", username)
-                    editor.apply()
-
-
-                    val intent = Intent(this, MainActivity::class.java)
-                    intent.putExtra("USERNAME_EXTRA", username)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    // Firebase authentication failed
-                    Toast.makeText(this, "Firebase Authentication Failed", Toast.LENGTH_SHORT)
-                        .show()
-                    updateUI(null)
-                }
-            }
-    }
 }
 

@@ -1,5 +1,6 @@
 package com.smh.finalproject
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -19,6 +20,9 @@ class ComplianceActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var backButton: Button
     private lateinit var textView: TextView
+    private lateinit var totalMessyAreasTextView: TextView
+
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_compliance)
@@ -38,6 +42,9 @@ class ComplianceActivity : AppCompatActivity() {
 
         val historyList = mutableListOf<HistoryItem>()
         val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
+
+        val totalMessyAreasTextView: TextView = findViewById(R.id.totalMessyAreas)
+
 
         currentUserID?.let { uid ->
             firestoreDB.collection("images").whereEqualTo("userId", uid).get()
@@ -65,7 +72,8 @@ class ComplianceActivity : AppCompatActivity() {
                         totalMessyCount += messyCount
                     }
 
-                    //messyTextView.text = "Messy Total: $totalMessyCount"
+                    totalMessyAreasTextView.text = "Messy Total: $totalMessyCount"
+                    totalMessyAreasTextView.text = getString(R.string.total_messy_areas, totalMessyCount)
 
 
                     for ((date, messyCount) in historyMap) {
@@ -84,7 +92,7 @@ class ComplianceActivity : AppCompatActivity() {
                         }
                     }
 
-                    historyList.sortWith(compareByDescending { it.date })
+                    historyList.sortWith(compareByDescending{ getDateYear(it.date) })
 
                     val adapter = ComplianceAdapter(historyList)
                     recyclerView.visibility = View.VISIBLE
@@ -107,6 +115,14 @@ class ComplianceActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+    }
+    private fun getDateYear(date: String): Long {
+        val parts = date.split("/")
+        val year = parts[2].toIntOrNull() ?: 0
+        val month = parts[0].toIntOrNull() ?: 0
+        val day = parts[1].toIntOrNull() ?: 0
+
+        return year * 10000L + month * 100L + day
     }
 
 

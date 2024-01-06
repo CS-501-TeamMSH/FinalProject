@@ -30,9 +30,23 @@
                 android:textSize="25sp" />
 
 
+
         </LinearLayout>
 
     </com.google.android.material.appbar.MaterialToolbar>
+
+    <TextView
+        android:id="@+id/totalMessyAreas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:text="Total Non-Compliant Spaces"
+        android:textStyle="bold"
+    android:textSize="20sp"
+    android:textAlignment="center"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/toolbar" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/historyRecycler"
@@ -45,7 +59,7 @@
         app:layout_constraintBottom_toTopOf="@+id/backButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+        app:layout_constraintTop_toBottomOf="@id/totalMessyAreas" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/backButton"

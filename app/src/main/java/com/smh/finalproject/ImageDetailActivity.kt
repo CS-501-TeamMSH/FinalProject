@@ -42,7 +42,7 @@ class ImageDetailActivity : AppCompatActivity() {
     private lateinit var gallery: ImageView
     private lateinit var imageView: ImageView
     private lateinit var result: TextView
-    private lateinit var back: TextView
+    private lateinit var back: Button
     private val imageSize = 224
 
     private lateinit var firebaseAuth: FirebaseAuth
