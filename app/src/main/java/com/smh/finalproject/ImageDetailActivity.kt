@@ -124,7 +124,7 @@ class ImageDetailActivity : AppCompatActivity() {
         builder.setTitle("Select Tag")
         builder.setItems(tags) { _, which ->
             val selectedTag = tags[which]
-            Toast.makeText(this, selectedTag, Toast.LENGTH_SHORT).show()
+          //  Toast.makeText(this, selectedTag, Toast.LENGTH_SHORT).show()
             // Store the bitmap image and the classification text with the selected tag
             preventFirebaseDuplicates(bitmap, result.text.toString(), selectedTag)
         }

@@ -19,6 +19,7 @@
     <string name="add_dashboard"> Upload </string>
     <string name="back">Back To Dashboard</string>
     <string name="no_image">No Spaces Submitted</string>
+    <string name="view_video">New Here? Click to learn more!</string>
     <string name="non_compliant_spaces">Non-Compliant Spaces: %1$d</string>
     <string name="total_messy_areas">Total Non-Compliant Spaces: %d</string>
 

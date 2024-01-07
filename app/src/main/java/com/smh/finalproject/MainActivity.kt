@@ -46,7 +46,6 @@ class MainActivity : AppCompatActivity() {
     private val CAMERA_REQUEST_CODE = 101
     private val GALLERY_REQUEST_CODE = 102
     private var imageUri: Uri? = null
-
     private lateinit var calendar: ImageButton
     private lateinit var messyText: TextView
     private lateinit var compliance: ImageButton
@@ -54,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var signOut: ImageButton
 
     private lateinit var fabButton: FloatingActionButton
+    private lateinit var video: TextView
 
     private lateinit var firebaseAuth: FirebaseAuth
     private lateinit var firebaseStorage: FirebaseStorage
@@ -107,11 +107,20 @@ class MainActivity : AppCompatActivity() {
 
         messyText = findViewById(R.id.dashtitle)
 
+        video = findViewById<TextView>(R.id.noImage2)
+
         // Init Swipe Listener
         val swipeListener = GestureDetectorCompat(this, SwipeListener())
 
         recyclerView.setOnTouchListener { _, event ->
             swipeListener.onTouchEvent(event)
+        }
+
+
+        video.setOnClickListener{
+            val intent = Intent(this, com.smh.finalproject.VideoView::class.java)
+            startActivity(intent)
+            finish()
         }
 
 
@@ -332,7 +341,15 @@ class MainActivity : AppCompatActivity() {
                     noImageText.text = getString(R.string.no_image)
                     noImageText.visibility = View.VISIBLE
                     recyclerView.visibility = View.GONE
+                    val noImage2TextView = findViewById<TextView>(R.id.noImage2)
+                    noImage2TextView.visibility = View.VISIBLE
+
+                    // Hide the noImage2 TextView if there are uploaded images
                 } else {
+                    val noImage2TextView = findViewById<TextView>(R.id.noImage2)
+                    noImage2TextView.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
+
                     val items = mutableListOf<Item>()
                     items.addAll(messyItems)
                     items.addAll(cleanItems)

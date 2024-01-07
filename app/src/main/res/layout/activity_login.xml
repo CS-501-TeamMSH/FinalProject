@@ -137,24 +137,24 @@
 <!--        app:layout_constraintStart_toStartOf="parent"-->
 <!--        app:layout_constraintTop_toBottomOf="@+id/loginCardView" />-->
 
-    <TextView
-        android:id="@+id/registerTextView"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="64dp"
-        android:clickable="true"
-        android:elevation="1dp"
-        android:focusable="true"
-        android:fontFamily="@font/ubuntu_bold"
-        android:gravity="center"
-        android:text="@string/register"
-        android:textColor="#0000FF"
-        android:textSize="16sp"
-        app:cornerRadius="9dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/loginCardView" />
+        <TextView
+            android:id="@+id/registerTextView"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="64dp"
+            android:clickable="true"
+            android:elevation="1dp"
+            android:focusable="true"
+            android:fontFamily="@font/ubuntu_bold"
+            android:gravity="center"
+            android:text="@string/register"
+            android:textColor="#0000FF"
+            android:textSize="16sp"
+            app:cornerRadius="9dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/loginCardView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
