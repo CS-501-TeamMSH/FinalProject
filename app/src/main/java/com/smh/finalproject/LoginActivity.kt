@@ -3,6 +3,7 @@ package com.smh.finalproject
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -81,7 +82,7 @@ class LoginActivity : AppCompatActivity() {
             finish()
         } else {
            // showSignInOrRegisterDialog()
-            Toast.makeText(this, "Please Sign In", Toast.LENGTH_SHORT).show()
+          Toast.makeText(this, "Please Sign In or Register", Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -23,6 +23,15 @@ class MainDisplayActivity : AppCompatActivity() {
         val editTextPassword = findViewById<EditText>(R.id.editTextPassword)
         val buttonRegister = findViewById<Button>(R.id.submitButton)
 
+
+        val buttonLogin = findViewById<Button>(R.id.backButton)
+
+        buttonLogin.setOnClickListener {
+            val intent = Intent(this, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        }
+
         buttonRegister.setOnClickListener {
             val enteredUsername = editTextUsername.text.toString()
             val enteredPassword = editTextPassword.text.toString()
